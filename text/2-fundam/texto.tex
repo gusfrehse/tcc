@@ -1,16 +1,108 @@
-\chapter{Alguns exemplos}
+\chapter{Fundamentacão Teórica}
 \label{cap:exemplos}
 
 % figuras estão no subdiretório "figuras/" dentro deste capítulo
 \graphicspath{\currfiledir/figuras/}
 
 %=====================================================
+\section{Síntese de imagens realistas}
 
-\section{Guias de \LaTeX}
+O problema fundamental que procuramos resolver é, em termos mais simples, dado
+uma descrição de uma cena virtual (geometria, posição das fontes de
+luz, posição/direção da câmera), qual a cor dos pixels da imagem que essa
+câmera capturaria, considerando que as leis da física aplicariam nessa cena
+virtual.
 
-Este modelo contém exemplos para os padrões de inserção de figuras, tabelas, listas de itens, bibliografia, etc. Em caso de dúvidas ou discordância, Pode-se entrar em contato com a direção ou secretaria do programa. Obviamente, críticas (construtivas) e sugestões são muito bem-vindas.
+Nesse trabalho iremos simplificar nosso tratamento para luzes de somente uma
+frequência (monocromática), porém os algoritmos são facilmente traduzidos para
+múltiplas frequências.
 
-Para aprender a usar \LaTeX, um bom guia introdutório disponível na Internet é \cite{oetiker07}, que também tem uma versão em português. Para tópicos mais avançados consulte \cite{goossens93}.
+Dessa forma, a cor de um pixel está atrelada à intensidade de luz que chega no
+sensor correspondente a aquele pixel. Por exemplo, se em certo sensor chega
+pouca luz, o valor do pixel correspondente vai ser mais baixo, próximo de zero.
+Por outro lado, caso nesse sensor chegue bastante luz, o valor será mais alto.
+\footnote{O valor específico depende de muitos fatores, codificação,
+decodificação, características específicas do sensor, características
+específicas do monitor, configurações de sistema operacional, entre outras. Por
+causa dessa complexidade não é incomum achar sistemas que não produzem imagens
+corretas, apesar de nesses casos os erros serem sutis.}
+
+Outra simplificação comum que fazemos é assumir o modelo de câmera pinhole
+\cite[Cap. 5]{pbrt4}, no qual cada sensor recebe luz de apenas uma
+direção\footnote{Nos olhos humanos e em câmeras com lentes, raios de luz de
+múltiplas direções podem atingir a mesma célula sensorial/sensor. Isso causa
+diversos efeitos, como por exemplo de profundidade de campo.}.
+
+[IMAGEM PINHOLE]
+
+Assim, como a luz atravessa o espaço em linha reta (pelo menos no escopo desse
+trabalho), podemos seguir a direção do sensor para descobrir de qual ponto ela
+está vindo e qual a intensidade. Esse ponto, que faz parte da geometria, pode
+estar emitindo luz de duas maneiras. A primeira é uma emissão autônoma, que
+ocorre quando o ponto é uma fonte de luz (um LED por exemplo, ou o sol). A outra
+é quando existe a reflexâo de raios que bateram nesse ponto e foram para a
+direção do nosso sensor.
+
+O primeiro é um termo que depende apenas da posição do ponto e da direção de
+saída (direção para o sensor). O segundo é mais complicado. Dependendo da
+superfície no ponto em questão (por exemplo, vidro, metal, plástico, etc.),
+podemos ter diversos comportamentos diferentes. Um espelho, por exemplo,
+refletirá (na direção do sensor) quase o total dos raios de luz que incidem no
+mesmo plano e no mesmo ângulo que a direção do sensor, e quase nenhum outro raio
+que incida de outra direção. Por outro lado, uma superfície fosca refletirá na
+direção do sensor quase qualquer raio que chegar nela, apesar de com uma
+intensidade menor. Esses dois casos ilustram exemplos extremos, no espelho temos
+quase somente uma reflexão \emph{especular}, enquanto na superfície fosca temos
+quase somente uma reflexão \emph{difusa}. Na prática, as superfícies costumam
+ter uma mistura desses dois tipos de reflexão.
+
+Então para saber qual a intensidade da luz vinda desse ponto na direção do
+sensor, precisamos, no caso mais geral, saber a intensidade dos raios de todas
+as outras direções que chegam nesse ponto (pois possivelmente qualquer um poderá
+refletir na direção do sensor, dependendo da superfície).
+
+Parece que estamos entrando num ciclo, e estamos. Não só precisamos calcular
+novamente a intensidade de um raio de luz, como precisamos calcular para
+infinitos raios que chegam no nesse ponto. E cada um desse novos raios poderá
+ter sido refletido de outro ponto, e nesse outro ponto teríamos de investigar 
+origem de mais infinitos raios incidentes, e assim em diante.
+
+Na década de 80, \cite{kajiya86} explicitou esse problema em uma equação
+integral recursiva, baseando-se em modelos de transferência de calor já
+existentes utilizados em cálculos físicos. Usaremos essa equação diversas vezes,
+porém com a notação mais comumente utilizada de \citep{veach97}:
+
+\begin{equation}
+  L(x' \rightarrow x'') = \int_\mathcal{M} L(x \rightarrow x') f_s(x \rightarrow
+  x' \rightarrow x'') G(x \leftrightarrow x') dA(x)
+  \label{eq:render}
+\end{equation}
+
+[IMAGEM COM x x' x'' E UM RAIO]
+
+\section{Equação da Renderização}
+
+A Equação \eqref{eq:render}, que é chamada de Equação da Renderização, segue o
+raciocínio da seção passada: A radiância no ponto $x$ vinda do ponto $x'$ é
+igual soma das das radiâncias vindas de outros pontos na geometria da cena ($L(x
+\rightarrow x')$) ponderadas por um peso ($f(x \rightarrow x' \rightarrow x'')$)
+e um termo de geometria ($G(x \leftrightarrow x')$).
+
+O peso $f_s$ é chamado de BRDF, \emph{bidirectional reflectance distribution
+function} e diz, dada uma direção de incidência e uma direção de reflexão, qual
+porcentagem de raios de luz (ou mais formalmente a razão da radiância) que é
+refletida.
+
+O termo de geometria $G(x \leftrightarrow x')$ engloba duas partes. Primeiro ele
+é encarregado de checar se o ``caminho está livre'' entre os pontos $x$ e $x'$. Se
+existe alguma parte da geometria da cena que, olhando do ponto $x$, oclude o
+ponto $x'$, então $G(x \leftrightarrow x') = 0$ e assim desconsideramos a
+possível contribuição de radiância vinda de $x$.
+
+
+
+
+
 
 %=====================================================
 
