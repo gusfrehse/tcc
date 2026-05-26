@@ -33,15 +33,15 @@ direção\footnote{Nos olhos humanos e em câmeras com lentes, raios de luz de
 múltiplas direções podem atingir a mesma célula sensorial/sensor. Isso causa
 diversos efeitos, como por exemplo de profundidade de campo.}.
 
-[IMAGEM PINHOLE]
+[TODO: imagem pinhole]
 
-Assim, como a luz atravessa o espaço em linha reta (pelo menos no escopo desse
-trabalho), podemos seguir a direção do sensor para descobrir de qual ponto ela
-está vindo e qual a intensidade. Esse ponto, que faz parte da geometria, pode
-estar emitindo luz de duas maneiras. A primeira é uma emissão autônoma, que
-ocorre quando o ponto é uma fonte de luz (um LED por exemplo, ou o sol). A outra
-é quando existe a reflexâo de raios que bateram nesse ponto e foram para a
-direção do nosso sensor.
+Assim, como a luz atravessa o espaço em linha reta\footnote{Pelo menos para o
+escopo desse trabalho.}, podemos seguir a direção do sensor para descobrir de
+qual ponto pertencente à geometria ela está vindo e qual a sua intensidade.
+Esse ponto pode estar emitindo luz na direção do sensor de duas maneiras. A
+primeira é uma emissão autônoma, que ocorre quando o ponto é uma fonte de luz
+(um LED por exemplo, ou o sol). A outra é quando existe a reflexão de raios que
+bateram nesse ponto e foram para a direção do nosso sensor.
 
 O primeiro é um termo que depende apenas da posição do ponto e da direção de
 saída (direção para o sensor). O segundo é mais complicado. Dependendo da
@@ -67,10 +67,11 @@ infinitos raios que chegam no nesse ponto. E cada um desse novos raios poderá
 ter sido refletido de outro ponto, e nesse outro ponto teríamos de investigar 
 origem de mais infinitos raios incidentes, e assim em diante.
 
-Na década de 80, \cite{kajiya86} explicitou esse problema em uma equação
-integral recursiva, baseando-se em modelos de transferência de calor já
-existentes utilizados em cálculos físicos. Usaremos essa equação diversas vezes,
-porém com a notação mais comumente utilizada de \citep{veach97}:
+Na década de 80, \cite{kajiya86}, baseando-se em modelos de transporte de
+partículas já existentes utilizados em cálculos físicos, explicitou esse
+problema em uma equação integral recursiva. Usaremos essa equação, chamada de
+\emph{Equação da Renderização}, diversas vezes, porém com a notação mais
+comumente utilizada de \cite{veach97}:
 
 \begin{equation}
   L(x' \rightarrow x'') = \int_\mathcal{M} L(x \rightarrow x') f_s(x \rightarrow
@@ -78,26 +79,42 @@ porém com a notação mais comumente utilizada de \citep{veach97}:
   \label{eq:render}
 \end{equation}
 
-[IMAGEM COM x x' x'' E UM RAIO]
+[TODO: imagem com x x' x'' e um raio]
 
 \section{Equação da Renderização}
 
-A Equação \eqref{eq:render}, que é chamada de Equação da Renderização, segue o
-raciocínio da seção passada: A radiância no ponto $x$ vinda do ponto $x'$ é
-igual soma das das radiâncias vindas de outros pontos na geometria da cena ($L(x
-\rightarrow x')$) ponderadas por um peso ($f(x \rightarrow x' \rightarrow x'')$)
-e um termo de geometria ($G(x \leftrightarrow x')$).
+A medida física de $L$ é chamada de \emph{radiância}, e pode ser pensada como a
+intensidade da luz vinda de certa direção, apesar de sua definição formal ter
+mais nuances. Ver \cite[Cap. 5]{pbrt4}.
+
+A Equação da Renderização segue o raciocínio da seção passada: a radiância no
+ponto $x''$ vinda do ponto $x'$ é igual à soma das das radiâncias vindas de outros
+pontos na geometria da cena, $L(x \rightarrow x')$, ponderadas por um peso,
+$f_s(x \rightarrow x' \rightarrow x'')$, e um termo de geometria $G(x
+\leftrightarrow x')$.
 
 O peso $f_s$ é chamado de BRDF, \emph{bidirectional reflectance distribution
 function} e diz, dada uma direção de incidência e uma direção de reflexão, qual
-porcentagem de raios de luz (ou mais formalmente a razão da radiância) que é
-refletida.
+a porcentagem de raios de luz que é refletida no ponto $x'$. Ou, especificamente,
+qual a razão da radiância vinda do ponto $x$, refletida no ponto $x'$ e que
+chega no ponto $x''$.
 
 O termo de geometria $G(x \leftrightarrow x')$ engloba duas partes. Primeiro ele
 é encarregado de checar se o ``caminho está livre'' entre os pontos $x$ e $x'$. Se
 existe alguma parte da geometria da cena que, olhando do ponto $x$, oclude o
 ponto $x'$, então $G(x \leftrightarrow x') = 0$ e assim desconsideramos a
-possível contribuição de radiância vinda de $x$.
+possível contribuição de radiância vinda de $x$. A segunda parte serve para
+incorporar o efeito da lei de Lambert, que diz que a intensidade da luz
+observada é diretamente proporcional ao cosseno do ângulo de incidência do raio
+de luz, ver \cite[Cap. 5]{pbrt4}. Como temos duas incidências, o termo fica com
+dois cossenos:
+
+\[
+  G(x \leftrightarrow x') = \frac{\cos{\theta_i}\cos{\theta_o}}{dA}
+\]
+
+[TODO: checar formula, ver se faz mais sentido colocar aqui a versão de pontos ou a versão direcional ou ainda a versão de caminhos]
+
 
 
 
