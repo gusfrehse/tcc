@@ -113,7 +113,21 @@ dois cossenos:
   G(x \leftrightarrow x') = \frac{\cos{\theta_i}\cos{\theta_o}}{dA}
 \]
 
-[TODO: checar formula, ver se faz mais sentido colocar aqui a versão de pontos ou a versão direcional ou ainda a versão de caminhos]
+[TODO: checar formula, ver se faz mais sentido colocar aqui a versão de
+pontos ou a versão direcional ou ainda a versão de caminhos]
+
+\section{INTEGRAÇÃO COM O MÉTODO DE MONTE CARLO}
+
+Como visto na seção anterior, para resolver o problema da renderização
+precisamos resolver uma integral especialmente complicada. Tirando em casos
+triviais\footnote{Por exemplo no caso em que estamos no centro de uma esfera e toda a
+superfície dessa esfera é difusa ($f_s$ é constante), em que aí podemos
+calcular $L(x \rightarrow x')$ analiticamente, sem entrar na recursão.},
+devido à alta dimensionalidade da integral, é necessário utilizar método
+mais potentes, como o por exemplo o método de Monte Carlo introduzido em
+\cite{metropolis49}.
+
+
 
 
 
