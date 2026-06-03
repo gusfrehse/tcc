@@ -67,6 +67,8 @@ infinitos raios que chegam nesse ponto. E cada um desses novos raios poderá
 ter sido refletido de outro ponto, e nesse outro ponto teríamos de investigar 
 origem de mais infinitos raios incidentes, e assim em diante.
 
+\section{Equação da Renderização}
+
 Na década de 80, \cite{kajiya86}, baseando-se em modelos de transporte de
 partículas já existentes utilizados em cálculos físicos, explicitou esse
 problema em uma equação integral recursiva. Usaremos essa equação, chamada de
@@ -80,8 +82,6 @@ comumente utilizada de \citet{veach97}:
 \end{equation}
 
 [TODO: imagem com x x' x'' e um raio]
-
-\section{Equação da Renderização}
 
 A medida física de $L$ é chamada de \emph{radiância}, e pode ser pensada como a
 intensidade da luz vinda de certa direção, apesar de sua definição formal ter
@@ -110,7 +110,7 @@ de luz, ver \cite[Cap. 5]{pbrt4}. Como temos duas incidências, o termo fica com
 dois cossenos:
 
 \[
-  G(x \leftrightarrow x') = \frac{\cos{\theta_i}\cos{\theta_o}}{dA}
+  G(x \leftrightarrow x') = \frac{\cos{\theta_i}\cos{\theta_o}}{\left|\left|x' - x''\right|\right|}
 \]
 
 [TODO: checar formula, ver se faz mais sentido colocar aqui a versão de
@@ -120,12 +120,100 @@ pontos ou a versão direcional ou ainda a versão de caminhos]
 
 Como visto na seção anterior, para resolver o problema da renderização
 precisamos resolver uma integral especialmente complicada. Tirando em casos
-triviais\footnote{Por exemplo no caso em que estamos no centro de uma esfera e toda a
-superfície dessa esfera é difusa ($f_s$ é constante), em que aí podemos
-calcular $L(x \rightarrow x')$ analiticamente, sem entrar na recursão.},
-devido à alta dimensionalidade da integral, é necessário utilizar método
-mais potentes, como o por exemplo o método de Monte Carlo introduzido em
-\cite{metropolis49}.
+triviais\footnote{Por exemplo no caso em que estamos no centro de uma esfera e
+toda a superfície dessa esfera é difusa ($f_s$ é constante), em que aí podemos
+calcular $L(x \rightarrow x')$ analiticamente, sem entrar na recursão.}, devido
+à alta dimensionalidade da integral, é necessário utilizar métodos mais
+potentes. Um desses é o método de Monte Carlo, introduzido por
+\citet{metropolis49}.
+
+
+Para explicar o método, será mais fácil entender no caso discreto e em seguida
+generalizar para a versão contínua, que é a que iremos utilizar.
+
+Vamos considerar que queremos calcular a soma
+
+\[
+  S = \sum_{x \in D} f(x)
+\]
+
+para uma função $f: D \rightarrow \mathbb{R}$ e $D$ um conjunto finito
+qualquer. Consideramos também que a função $f$ é bastante custosa
+computacionalmente, então queremos diminuir o número de vezes que avaliamos
+ela. 
+
+Como $D$ pode ter potencialmente um grande número de elementos, torna-se
+invíavel evaluar $f$ em todos os elementos de $D$ para obter o valor exato de
+$S$. O que podemos fazer, porém, é obter uma estimativa.
+
+Para fazer isso, primeiro notamos que é possível escrever a soma original como
+uma média (chamada também de valor esperado ou esperança) de outra função
+aplicada a uma variável aleatória.
+
+Seja $p: D \rightarrow \mathbb{R}$ uma distribuição de probabilidade em $D$ e
+que $p(x) > 0$ para todo $x$ tal que $f(x) \not = 0$, temos
+
+\begin{align*}
+  S &= \sum_{x \in D} f(x) = \sum_{x \in D} \frac{f(x)}{p(x)} \cdot p(x) = \left\langle \frac{f(X)}{p(X)} \right\rangle
+\end{align*}
+
+Onde usamos a notação $\langle Y \rangle$ para denotar a esperança de uma
+variável aleatória $Y$.
+
+Agora, para fazer a estimativa, podemos usar a Lei dos Grandes Números, que diz
+que
+
+\[ \langle Y \rangle \approx \frac{1}{N} \sum_{i=1}^N Y_i \]
+
+onde $Y_i$ são $N$ amostras independentes e distribuídas da mesma forma que
+$Y$. Assim
+
+\[ S = \left\langle \frac{f(X)}{p(X)} \right\rangle \approx \frac{1}{N}
+\sum_{i=1}^N \frac{f(X_i)}{p(X_i)} = S_N \]
+
+onde $S_N$ é o nosso estimador de Monte Carlo. Para generalizar para a versão
+contínua, queremos calcular a integral
+
+\[ I = \int_{x \in D} f(x) dx = \int_{x \in D} \frac{f(x)}{p(x)} p(x) dx =
+\left\langle \frac{f(X)}{p(X)} \right\rangle \]
+
+agora com $D$ contínuo e mensurável. Assim podemos usar o mesmo estimador e
+temos
+
+\[ I = \left\langle \frac{f(X)}{p(X)} \right\rangle \approx \frac{1}{N}
+\sum_{i=1}^N \frac{f(X_i)}{p(X_i)} = I_N \]
+
+É importante notar que podemos escolher qualquer $p$, desde que seja uma a
+distribuição de probabilidade de $D$. Com isso em mente, podemos utilizar um
+$p$ com objetivo de minimizar a variância. Uma variância menor significa que
+precisamos de menos amostras (menor $N$) para chegar mais perto do valor real
+$I$, o que torna o método muito mais eficiente.
+
+Aqui a escolha ideal de $p$ é tal que $p(x) = c \cdot f(x)$ onde $c$ é
+calculada para que $p$ permaneça normalizado \citep{kalos08}
+
+\[
+  c = \frac{1}{\int_{x \in D} f(x) dx}
+\]
+
+Dessa forma $\frac{f(X)}{p(X)} = 1/c$, uma constante, e a variância é zero. O
+problema é que, como sabemos, não queremos calcular $f$ diretamente, então em
+vez disso podemos utilizar uma distribuição $p$ que se aproxime de $c \cdot
+f(x)$, assim reduzindo a variância.
+
+Essa técnica, de escolher um $p$ com ``uma curva semelhante'' à $f$ se chama
+\emph{amostragem de importância}. Intuitivamente, podemos pensar que escolhemos
+uma distribuição de probabilidade que vai deixar mais frequente amostras que
+contribuem mais para o resultado final e menos frequente amostras que pouco
+afetam o resultado final, assim diminuindo o número de amostras que precisamos
+para ter um resultado parecido com o original.
+
+Usando como exemplo o path tracing, uma amostra ruim seria um caminho de luz
+que reflete várias vezes na geometria antes de chegar no sensor. Como em cada
+reflexão ela perde um pouco de energia, a contribuição final no valor do pixel
+é mínima. Contrastando com o caso de um caminho de iluminação direta, em que o
+raio de luz vai direto da iluminação até o sensor, que teria uma grande
+contribuição no valor final do pixel.
 
 
 
