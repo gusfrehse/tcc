@@ -1,50 +1,3 @@
-% Modelos de referências em BibTeX
-
-% ATENCAO:
-%
-% - para preservar as maiúsculas em siglas nos títulos, use {...}.
-    Veja um exemplo na referência "iskandar00" abaixo.
-
-%%%%% exemplo de livro 
-@book{iskandar00,
-   author	= {J. Iskandar},
-   title	= {Normas da {ABNT} Comentadas para Trabalhos Científicos},
-   year		= {2000},
-   publisher	= {Editora Champagnat (PUCPR)}
-}
-
-%%%%% exemplo de parte de livro
-@inbook{Birman89,
-   author	= {K. Birman and T. Joseph},
-   editor	= {S. Mullender},
-   pages	= {293-317},
-   publisher	= {Addison-Wesley},
-   title	= {Reliable Broadcast Protocols in Distributed Systems},
-   year		= {1989}
-}
-
-%%%%% exemplo de manual
-@manual{Chorus96a,
-   title	= {Chorus/Cool-ORB r3 - Product Description},
-   organization = {Chorus Systems},      
-   note	= {CS/TR-95-157.3},
-   month	= {June},
-   year		= {1996}
-}
-
-%%%%% exemplo de tese de doutorado
-@phdthesis{Maziero94,
-   author	= {C. Maziero},
-   title	= {Conception et réalisation d'un noyau de système
-   		   réparti pour la simulation parallèle},
-   school	= {IRISA - Université de Rennes I}, 
-   address	= {Rennes - France},
-   note 	= {137 pgs},
-   number	= {1161},
-   month	= {June},
-   year		= {1994}
-}
-
 @phdthesis{veach97,
   author       = {Eric Veach},
   title        = {Robust Monte Carlo Methods for Light Transport Simulation},
@@ -52,66 +5,6 @@
   year         = {1997},
   address      = {Stanford, CA},
 }
-
-%%%%% exemplo de dissertação de mestrado
-@mastersthesis{Ribeiro97,
-   author	= {R. Ribeiro},
-   title	= {Proposta de um suporte para simulações orientadas a 
-		   objetos distribuídas em uma plataforma aberta},
-   school	= {Pós-Graduação em Engenharia Elétrica - Universidade
-		   Federal de Santa Catarina}, 
-   address	= {Fpolis - SC},
-   note 	= {},
-   number	= {},
-   month	= {Junho},
-   year		= {1997}
-}
-
-%%%%% exemplo de artigo em revista
-@article{Awerbuch85a,
-   author	= {B. Awerbuch},
-   title	= {Complexity of network synchronization},
-   journal	= {Journal of ACM},
-   volume	= {32},
-   number	= {4},
-   pages	= {801-823},
-   note 	= {invited paper},
-   month	= {October},
-   year		= {1985}
-}
-
-%%%%% exemplo de artigo em evento
-@conference{Adam88,
-   author	= {M. Adam and Ph. Ingels and M. Raynal},
-   title	= {The meaning of synchronous distributed algorithms run on
-		   asynchronous distributed systems},
-   booktitle	= {3$^{rd}$ International Symposium on Computer and
-		   Information Sciences},
-   address	= {Izmir - Turkey},
-   pages	= {307-316},
-   month	= {November},
-   year		= {1988}
-}
-
-%%%%% exemplo de relatório técnico
-@techreport{bibufpr15,
-   author	= {Biblioteca UFPR},
-   institution	= {Sistema de Bibliotecas -- Universidade Federal do Paran\'a},
-   title	= {Manual de normaliza\c{c}\~ao de documentos cient\'ificos de acordo com as normas da {ABNT}},
-   number	= {ISBN 9788584800025},
-   address	= {Curitiba PR},
-   year		= {2015}
-}
-
-%%%%% exemplo de URL (páginas Web)
-@misc{maziero15,
-   title	= {Modelo {PPGInf UFPR} para teses e dissertações},
-   author	= {Carlos Maziero},
-   howpublished	= {\url{http://www.inf.ufpr.br/maziero}},
-   year		= {2015},
-   note		= {Acessado em 30/11/2015}
-}
-
 
 @book{pbrt4,
   author = {Matt Pharr and Greg Humphreys and Wenzel Jakob},
@@ -167,3 +60,43 @@
   keywords = {variance reduction, importance sampling, control variate, antithetic variates, adaptive Monte Carlo, quasi-Monte Carlo, stratified sampling},
   abstract = {Summary This chapter contains sections titled: Importance Sampling The Use of Expected Values to Reduce Variance Correlation Methods for Variance Reduction Adaptive Monte Carlo Methods Quasi-Monte Carlo Comparison of Monte Carlo Integration, Quasi-Monte Carlo and Numerical Quadrature References Further Reading}
 }
+
+@article{lin22,
+  author = {Lin, Daqi and Kettunen, Markus and Bitterli, Benedikt and Pantaleoni, Jacopo and Yuksel, Cem and Wyman, Chris},
+  title = {Generalized resampled importance sampling: foundations of ReSTIR},
+  year = {2022},
+  issue_date = {July 2022},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {41},
+  number = {4},
+  issn = {0730-0301},
+  url = {https://doi.org/10.1145/3528223.3530158},
+  doi = {10.1145/3528223.3530158},
+  journal = {ACM Trans. Graph.},
+  month = jul,
+  articleno = {75},
+  numpages = {23},
+  keywords = {MIS, ReSTIR, global illumination, path tracing, real-time rendering, resampled importance sampling}
+}
+
+@article{yan25,
+author = {Yan, Run and Guo, Hui and Huang, Libo and Xiao, Nong and Li, Shen and Wang, Yongwen and Lv, Yashuai and Chen, Gang},
+title = {A Survey on Deep Learning for Monte Carlo Path Tracing},
+year = {2025},
+issue_date = {March 2026},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {58},
+number = {4},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/3768618},
+doi = {10.1145/3768618},
+abstract = {Recent strides in hardware-accelerated ray tracing have propelled algorithms once deemed suitable only for offline rendering, like Monte Carlo path tracing, into interactive frame rates. While path tracing has been regarded as a practical utility in animating scenes for the film industry, achieving visually noise-free imagery often mandates thousands of samples per pixel and considerable computation time. Regrettably, this poses a difficulty for video games and virtual reality applications, which demand high frame rates and resolutions, thereby constraining the computational overhead of path tracing. Two extant approaches, in-process sampling, and post-processing reconstruction methods, i.e., denoising and upsampling, address this challenge. The giant evolution of deep learning technology has emerged as pivotal in path tracing processing. We explore and advance Monte Carlo path tracing technology based on deep learning. Moreover, we illustrate the merits and demerits of diverse designs and technologies, propose potential future development trends, and aim at providing researchers with a comprehensive understanding of the cutting-edge in deep learning-driven Monte Carlo path tracing.},
+journal = {ACM Comput. Surv.},
+month = oct,
+articleno = {101},
+numpages = {38},
+keywords = {Monte Carlo, path tracing, deep learning, sampling techniques, denoising, upsampling}
+}
+

@@ -7,11 +7,10 @@
 %=====================================================
 \section{Síntese de imagens realistas}
 
-O problema fundamental que procuramos resolver é, em termos mais simples, dado
-uma descrição de uma cena virtual (geometria, posição das fontes de
-luz, posição/direção da câmera), qual a cor dos pixels da imagem que essa
-câmera capturaria, considerando que as leis da física aplicariam nessa cena
-virtual.
+O problema fundamental que procuramos resolver é, em termos simples, dado uma
+descrição de uma cena virtual (geometria, posição das fontes de luz, posição e
+direção da câmera), qual a cor de cada um dos pixels da imagem que essa câmera
+capturaria, considerando que as leis da física aplicariam nessa cena virtual.
 
 Nesse trabalho iremos simplificar nosso tratamento para luzes de somente uma
 frequência (monocromática), porém os algoritmos são facilmente traduzidos para
@@ -19,52 +18,62 @@ múltiplas frequências.
 
 Dessa forma, a cor de um pixel está atrelada à intensidade de luz que chega no
 sensor correspondente a aquele pixel. Por exemplo, se em certo sensor chega
-pouca luz, o valor do pixel correspondente vai ser mais baixo, próximo de zero.
-Por outro lado, caso nesse sensor chegue bastante luz, o valor será mais alto.
-\footnote{O valor específico depende de muitos fatores, codificação,
-decodificação, características específicas do sensor, características
+pouca luz, o valor do pixel correspondente a aquele sensor vai ser mais baixo,
+próximo de zero. Por outro lado, caso chegue bastante luz, o valor será mais
+alto.\footnote{O valor específico depende de muitos fatores, codificação e
+decodificação da imagem, características específicas do sensor, características
 específicas do monitor, configurações de sistema operacional, entre outras. Por
 causa dessa complexidade não é incomum achar sistemas que não produzem imagens
-corretas, apesar de nesses casos os erros serem sutis.}
+corretas.}
 
-Outra simplificação comum que fazemos é assumir o modelo de câmera pinhole
-\cite[Cap. 5]{pbrt4}, no qual cada sensor recebe luz de apenas uma
-direção\footnote{Nos olhos humanos e em câmeras com lentes, raios de luz de
-múltiplas direções podem atingir a mesma célula sensorial/sensor. Isso causa
-diversos efeitos, como por exemplo de profundidade de campo.}.
+Outra simplificação comum que fazemos é assumir o modelo de câmera
+\emph{pinhole} \cite[Cap. 5]{pbrt4}, no qual cada sensor recebe luz de apenas
+uma direção.\footnote{Nos olhos humanos e em câmeras com lentes, raios de luz
+de múltiplas direções podem atingir a mesma célula sensorial/sensor. Isso causa
+diversos efeitos, como por exemplo de profundidade de campo.}
 
 [TODO: imagem pinhole]
 
-Assim, como a luz atravessa o espaço em linha reta\footnote{Pelo menos para o
-escopo desse trabalho.}, podemos seguir a direção do sensor para descobrir de
-qual ponto pertencente à geometria ela está vindo e qual a sua intensidade.
-Esse ponto pode estar emitindo luz na direção do sensor de duas maneiras. A
-primeira é uma emissão autônoma, que ocorre quando o ponto é uma fonte de luz
-(um LED por exemplo, ou o sol). A outra é quando existe a reflexão de raios que
-bateram nesse ponto e foram para a direção do nosso sensor.
+Com base nesse fato, podemos imaginar uma forma de descobrir a cor de cada
+pixel. Como a luz atravessa o espaço em linha reta,\footnote{Pelo menos para o
+escopo desse trabalho. A principal causa de caminhos não lineares são meios em
+que o índice de refração é variado contínuamente, alguns exemplos clássicos são
+a efeitos atmosféricos (razão de que o céu continua claro depois do sol se pôr)
+e uma solução de açúcar e água.} podemos seguir a direção do sensor para
+descobrir de qual ponto pertencente à geometria ela está vindo, e qual a sua
+intensidade. Esse ponto pode estar emitindo luz na direção do sensor de duas
+maneiras. A primeira é uma emissão autônoma, que ocorre quando o ponto é uma
+fonte de luz (um LED por exemplo, ou o sol). A outra é quando existe a reflexão
+de raios que bateram nesse ponto e foram para a direção do nosso sensor.
 
 O primeiro é um termo que depende apenas da posição do ponto e da direção de
 saída (direção para o sensor). O segundo é mais complicado. Dependendo da
 superfície no ponto em questão (por exemplo, vidro, metal, plástico, etc.),
 podemos ter diversos comportamentos diferentes. Um espelho, por exemplo,
-refletirá (na direção do sensor) quase o total dos raios de luz que incidem no
-mesmo plano e no mesmo ângulo que a direção do sensor, e quase nenhum outro raio
-que incida de outra direção. Por outro lado, uma superfície fosca refletirá na
-direção do sensor quase qualquer raio que chegar nela, apesar de com uma
-intensidade menor. Esses dois casos ilustram exemplos extremos, no espelho temos
-quase somente uma reflexão \emph{especular}, enquanto na superfície fosca temos
-quase somente uma reflexão \emph{difusa}. Na prática, as superfícies costumam
-ter uma mistura desses dois tipos de reflexão.
+refletirá (na direção do sensor) quase a totalidade dos raios de luz que
+incidem no mesmo plano e no mesmo ângulo que a direção do sensor, e quase
+nenhum outro raio que incida de outra direção. Por outro lado, uma superfície
+fosca refletirá na direção do sensor quase qualquer raio que chegar nela,
+apesar de com uma intensidade menor. Esses dois casos ilustram exemplos
+extremos, no espelho temos quase somente uma reflexão \emph{especular},
+enquanto na superfície fosca temos quase somente uma reflexão \emph{difusa}. Na
+prática, as superfícies costumam ter uma mistura desses dois tipos de reflexão.
 
 Então para saber qual a intensidade da luz vinda desse ponto na direção do
 sensor, precisamos, no caso mais geral, saber a intensidade dos raios de todas
-as outras direções que chegam nesse ponto (pois possivelmente qualquer um poderá
-refletir na direção do sensor, dependendo da superfície).
+as outras direções que chegam nesse ponto (pois, dependendo da superfície,
+possivelmente qualquer um desses raios incidentes poderá refletir na direção do
+sensor). Logo, precisamos calcular, para todas as direções, quanto de luz que
+chega de cada direção. Note que, para cada direção incidente, esse é exatamente
+o problema que começamos a resolver: em vez do sensor e sua direção
+correspondente, temos o ponto de geometria que achamos antes e uma direção nova
+(dentre as infinitas no hemisfério ao redor desse ponto que também precisariamos
+descobrir).
 
-Parece que estamos entrando num ciclo, e estamos. Não só precisamos calcular
+Parece que estamos entrando em um ciclo, e estamos. Não só precisamos calcular
 novamente a intensidade de um raio de luz, como precisamos calcular para
-infinitos raios que chegam nesse ponto. E cada um desses novos raios poderá
-ter sido refletido de outro ponto, e nesse outro ponto teríamos de investigar 
+infinitos raios que chegam nesse ponto. E cada um desses novos raios poderá ter
+sido refletido de outro ponto, e nesse outro ponto teríamos de investigar
 origem de mais infinitos raios incidentes, e assim em diante.
 
 \section{Equação da Renderização}
@@ -76,9 +85,9 @@ problema em uma equação integral recursiva. Usaremos essa equação, chamada d
 comumente utilizada de \citet{veach97}:
 
 \begin{equation}
-  L(x' \rightarrow x'') = \int_\mathcal{M} L(x \rightarrow x') f_s(x \rightarrow
-  x' \rightarrow x'') G(x \leftrightarrow x') dA(x)
-  \label{eq:render}
+  L(x' \rightarrow x'') = L_e(x' \rightarrow x'') + \int_{x \in \mathcal{M}}
+  L(x \rightarrow x') f_s(x \rightarrow x' \rightarrow x'') G(x \leftrightarrow
+  x') dA(x) \label{eq:render}
 \end{equation}
 
 [TODO: imagem com x x' x'' e um raio]
@@ -88,10 +97,11 @@ intensidade da luz vinda de certa direção, apesar de sua definição formal te
 mais nuances. Ver \cite[Cap. 5]{pbrt4}.
 
 A Equação da Renderização segue o raciocínio da seção passada: a radiância no
-ponto $x''$ vinda do ponto $x'$ é igual à soma das das radiâncias vindas de outros
-pontos na geometria da cena, $L(x \rightarrow x')$, ponderadas por um peso,
-$f_s(x \rightarrow x' \rightarrow x'')$, e um termo de geometria $G(x
-\leftrightarrow x')$.
+ponto $x''$ vinda do ponto $x'$ é igual à soma das das radiâncias vindas de
+outros pontos na geometria da cena na direção de $x'$, $L(x \rightarrow x')$,
+ponderadas por um peso, $f_s(x \rightarrow x' \rightarrow x'')$, e um termo de
+geometria $G(x \leftrightarrow x')$. Por último temos a medida de área $dA(x)$
+que indica a integração em cada área infinitesimal ao redor do ponto $x$. 
 
 O peso $f_s$ é chamado de BRDF, \emph{bidirectional reflectance distribution
 function} e diz, dada uma direção de incidência e uma direção de reflexão, qual
@@ -99,22 +109,41 @@ a porcentagem de raios de luz que é refletida no ponto $x'$. Ou, especificament
 qual a razão da radiância vinda do ponto $x$, refletida no ponto $x'$ e que
 chega no ponto $x''$.
 
-O termo de geometria $G(x \leftrightarrow x')$ engloba duas partes. Primeiro ele
-é encarregado de checar se o ``caminho está livre'' entre os pontos $x$ e $x'$. Se
-existe alguma parte da geometria da cena que, olhando do ponto $x$, oclude o
-ponto $x'$, então $G(x \leftrightarrow x') = 0$ e assim desconsideramos a
-possível contribuição de radiância vinda de $x$. A segunda parte serve para
-incorporar o efeito da lei de Lambert, que diz que a intensidade da luz
-observada é diretamente proporcional ao cosseno do ângulo de incidência do raio
-de luz, ver \cite[Cap. 5]{pbrt4}. Como temos duas incidências, o termo fica com
-dois cossenos:
+O termo de geometria $G(x \leftrightarrow x')$ engloba duas partes. Primeiro
+ele é encarregado de checar se o ``caminho está livre'' entre os pontos $x$ e
+$x'$. Se existe alguma parte da geometria da cena que, olhando do ponto $x$,
+oclude o ponto $x'$, então $V(x \leftrightarrow x') = 0$ e assim
+desconsideramos a possível contribuição de radiância vinda de $x$. Caso
+contrário, $V(x \leftrightarrow x') = 1$. A segunda parte serve para incorporar
+o efeito da lei de Lambert, que diz que a intensidade da luz observada é
+diretamente proporcional ao cosseno do ângulo de incidência do raio de luz.
+Como temos duas incidências, o termo fica com dois cossenos. Além disso,
+formalmente, a radiância é definida por estereoradianos, e, como essa
+quantidade diminui conforme o quadrado a distância entre os pontos
+($\left|\left|x - x'\right|\right|^2$) aumenta, temos que ajustar de acordo.
+Assim, $G$ é definido
+como
 
 \[
-  G(x \leftrightarrow x') = \frac{\cos{\theta_i}\cos{\theta_o}}{\left|\left|x' - x''\right|\right|}
+  G(x \leftrightarrow x') = V(x \leftrightarrow x')
+  \frac{\cos{\theta_i}\cos{\theta_o}}{\left|\left|x - x'\right|\right|^2}
 \]
 
-[TODO: checar formula, ver se faz mais sentido colocar aqui a versão de
-pontos ou a versão direcional ou ainda a versão de caminhos]
+Com $V$ sendo a função de visibilidade: $V(x \leftrightarrow x') = 1$ se existe
+uma reta sem obstruções entre $x$ e $x'$ e $V(x \leftrightarrow x') = 0$ no
+caso contrário.
+
+Para mais informações sobre as quantidades radiométricas, recomendamos a
+leitura de \citet[Cap. 5]{pbrt4} e \citet[Cap.3]{veach97}. Porém, acreditamos
+que a ideia mais intuitiva de radiância como a intensidade de luz vindo de uma
+direção é suficiente para entender esse trabalho.
+
+Vale notar que a Equação da Renderização é recursiva: $L$ aparece tanto no lado
+esquerdo quanto no integrando do lado direito. Isso torna essa versão completa
+da integral em uma equação integral de Fredholm de segundo tipo, que não possui
+solução analítica fechada para cenas arbitrárias. É essa dificuldade que motiva
+o uso de métodos de Monte Carlo para aproximar numericamente a solução, como
+faremos nas seções seguintes.
 
 \section{INTEGRAÇÃO COM O MÉTODO DE MONTE CARLO}
 
@@ -143,7 +172,7 @@ computacionalmente, então queremos diminuir o número de vezes que avaliamos
 ela. 
 
 Como $D$ pode ter potencialmente um grande número de elementos, torna-se
-invíavel evaluar $f$ em todos os elementos de $D$ para obter o valor exato de
+invíavel calcular $f$ em todos os elementos de $D$ para obter o valor exato de
 $S$. O que podemos fazer, porém, é obter uma estimativa.
 
 Para fazer isso, primeiro notamos que é possível escrever a soma original como
@@ -151,17 +180,16 @@ uma média (chamada também de valor esperado ou esperança) de outra função
 aplicada a uma variável aleatória.
 
 Seja $p: D \rightarrow \mathbb{R}$ uma distribuição de probabilidade em $D$ e
-que $p(x) > 0$ para todo $x$ tal que $f(x) \not = 0$, temos
+que $p(x) > 0$ para todo $x$ tal que $f(x) \not = 0$, podemos escrever
 
 \begin{align*}
-  S &= \sum_{x \in D} f(x) = \sum_{x \in D} \frac{f(x)}{p(x)} \cdot p(x) = \left\langle \frac{f(X)}{p(X)} \right\rangle
+  S &= \sum_{x \in D} f(x) = \sum_{x \in D} \frac{f(x)}{p(x)} \cdot p(x) =
+  \left\langle \frac{f(X)}{p(X)} \right\rangle
 \end{align*}
 
 Onde usamos a notação $\langle Y \rangle$ para denotar a esperança de uma
-variável aleatória $Y$.
-
-Agora, para fazer a estimativa, podemos usar a Lei dos Grandes Números, que diz
-que
+variável aleatória $Y$. Agora, para fazer a estimativa, podemos usar a Lei dos
+Grandes Números, que diz que
 
 \[ \langle Y \rangle \approx \frac{1}{N} \sum_{i=1}^N Y_i \]
 
@@ -189,8 +217,8 @@ $p$ com objetivo de minimizar a variância. Uma variância menor significa que
 precisamos de menos amostras (menor $N$) para chegar mais perto do valor real
 $I$, o que torna o método muito mais eficiente.
 
-Aqui a escolha ideal de $p$ é tal que $p(x) = c \cdot f(x)$ onde $c$ é
-calculada para que $p$ permaneça normalizado \citep{kalos08}
+Aqui a escolha ideal de $p$ é amplamente conhecida \citep{kalos08} e é dada por
+$p(x) = c \cdot f(x)$ onde $c$ é calculada para que $p$ permaneça normalizado
 
 \[
   c = \frac{1}{\int_{x \in D} f(x) dx}
@@ -201,12 +229,12 @@ problema é que, como sabemos, não queremos calcular $f$ diretamente, então em
 vez disso podemos utilizar uma distribuição $p$ que se aproxime de $c \cdot
 f(x)$, assim reduzindo a variância.
 
-Essa técnica, de escolher um $p$ com ``uma curva semelhante'' à $f$ se chama
+Essa técnica, de escolher um $p$ com ``uma curva semelhante'' à $f$, se chama
 \emph{amostragem de importância}. Intuitivamente, podemos pensar que escolhemos
 uma distribuição de probabilidade que vai deixar mais frequente amostras que
-contribuem mais para o resultado final e menos frequente amostras que pouco
-afetam o resultado final, assim diminuindo o número de amostras que precisamos
-para ter um resultado parecido com o original.
+são mais próximas do resultado final e menos frequente amostras que são muito
+diferentes do resultado final, assim diminuindo o número de amostras que
+precisamos para ter um resultado parecido com o verdadeiro.
 
 Usando como exemplo o path tracing, uma amostra ruim seria um caminho de luz
 que reflete várias vezes na geometria antes de chegar no sensor. Como em cada
@@ -215,11 +243,105 @@ reflexão ela perde um pouco de energia, a contribuição final no valor do pixe
 raio de luz vai direto da iluminação até o sensor, que teria uma grande
 contribuição no valor final do pixel.
 
+Na prática, usando como exemplo o nosso problema de síntese de imagens, uma
+amostra ruim seria uma direção em que não há nenhuma luz (uma parte escura da
+cena). Uma amostra boa, por outro lado, seria uma na direção de uma fonte de
+luz desobstruída.
+
+Voltando à Equação da Renderização \ref{eq:render}, podemos escrever a integral
+do lado direito da seguinte forma
+
+\begin{align*}
+  I &=  \int_{x \in \mathcal{M}} L(x \rightarrow x') f_s(x
+  \rightarrow x' \rightarrow x'') G(x \leftrightarrow x') dA(x)\\
+  &= \int_{x \in \mathcal{M}} f(x) dA(x)\\
+\end{align*}
+
+e assim podemos fazer um estimador Monte Carlo
+
+\[
+  I_N = \frac{1}{N} \sum_{i=1}^N \frac{f(X_i)}{p(X_i)}
+\]
+
+\section{TÉCNICAS DE AMOSTRAGEM}
+
+Ao usar o estimador da última seção, porém, precisamos escolher uma técnica de
+amostragem e a distribuição $p$ correspondente à ela. Como
+
+\[
+  f(x) = L(x \rightarrow x') f_s(x \rightarrow x' \rightarrow x'') G(x
+  \leftrightarrow x')
+\]
+
+e precisamos que $p$ seja parecida com $f$, podemos fazer com que $p$ seja
+proporcional à $f_s$, o BSDF. Essa estratégia clássica é chamada de
+\emph{Amostragem por BSDF}. Vamos chamar a distribuição de probabilidade dela
+de  $p_b$.
+
+Ela, como qualquer estratégia de amostragem, funciona bem (possui pouca
+variância) quando os outros termos de $f$ são aproximadamente uniformes e a
+forma de $f$ se aproxima à de $p_b$. Isso acontece, principalmente, quando $L$ em
+sí é aproximadamente uniforme.
+
+Alguns casos onde a amostragem por BSDF se destaca são
+
+\begin{itemize}
+  \item Cenas em céu aberto, onde o próprio céu é visto como uma fonte de luz.
+    Isso acontece pois quase todas as direções tem algum valor de radiância.
+    Assim o termo com mais impacto na forma de $f$ é o próprio BSDF.
+  \item Materiais reflexivos, como metais e espelhos. Nesse caso, os BDSF
+    desses materiais costumam ser bastante radicais, pois para haver a formação
+    de uma imagem de reflexão, é necessário que a maior parte da contribuição venha
+    de raios que o ângulo de inciência seja o mesmo do ângulo de reflexão, logo
+\end{itemize}
+
+Existem casos, porém, que a amostragem por BSDF não é a ideal. Em uma cena com
+somente uma pequena fonte de luz, por exemplo, a chance de ``batermos'' na
+fonte de luz, amostrando baseado na distribuição do BSDF, é muito pequena. Uma
+cena noturna, portanto, com apenas a luz da lua e de alguns postes, precisaria
+de muitas amostras para convergir para o resultado real. Olhando na definição
+de $f$, a presença de apenas poucas luzes na cena se traduz no fato de que $L$
+terá picos em algumas direções (direção das fontes de luz) e será próxima de
+zero em outras direções. Assim, o termo $L$ `ganha' do termo $f_s$, e $f$ deixa
+de ter o formato de $p_l$, consequentemente aumentando a variância de forma
+significante.
+
+Uma forma de resolver esse problema é usar outra estratégia de amostragem, como
+por exemplo a \emph{Amostragem de Iluminação}, amostrada em relação a
+distribuição de probabilidade $p_l$. Nessa estratégia amostramos um ponto da
+superfície de uma das fontes de luz da cena e continuamos nessa direção. Assim
+garantimos que estaremos em uma direção em que, caso não haja obstrução, o
+valor de $L$ será significativo.
+
+Exemplos de casos que melhor aproveitam a amostragem de iluminação são
+
+\begin{itemize}
+  \item Materiais com BSDF quase uniforme, ou seja, materiais foscos. Como BSDF
+    é uniforme, o formato de $f$ é dado por $L$.
+  \item Casos em que o termo de geometria seja simples, ou seja, que não haja
+    muitos objetos obstruindo as fontes de luz.\footnote{No caso da amostragem
+    por BSDF, por outro lado, como seguimos na direção amostrada até chegar no
+    próximo ponto, nunca teremos uma obstrução, então o termo de geometria é
+    capturado perfeitamente.}
+\end{itemize}
+
+Nesse trabalho, iremos utilizar essas duas estratégias de amostragem. Fazemos
+essa escolha pela relativa simplicidade de implementação e pelo fato de que as
+duas combinadas (ver próximas sessões) conseguem trazer um resultado
+satisfatório. Porém, existem outros métodos usados para amostragem, inclusive
+trata-se de uma das áreas com mais pesquisas recentemente \citep{lin22, yan25}. 
 
 
+[TODO: imagem com bsdf * le para cenas com poucas luzes pequenas e com luzes grandes]
 
 
+\section{AMOSTRAGEM DE IMPORTÂNCIA MÚLTIPLA}
 
+Com a sessão anterior, temos duas maneiras de conseguir amostras para nosso
+estimador de Monte Carlo, um com a Amostragem por BSDF e outro com Amostragem
+de Iluminação. Cada uma delas funciona melhor em certos casos - e é interessante notar que em casos praticamente excludentes.
+
+TODO: explicar que somar apenas as samples com um peso fixo w = 1 ou w = 1/2 tem muita variancia.
 
 
 
@@ -274,7 +396,6 @@ A maior parte das ferramentas permite exportar figuras nesses formatos (a figura
 \label{fig:comun-intra-inter}
 \end{figure}
 
-Para mais informações consulte \cite{goossens93}.
 
 %=====================================================
 
