@@ -266,7 +266,7 @@ e assim podemos fazer um estimador Monte Carlo
 \section{TÉCNICAS DE AMOSTRAGEM}
 
 Ao usar o estimador da última seção, porém, precisamos escolher uma técnica de
-amostragem e a distribuição $p$ correspondente à ela. Como
+amostragem e a distribuição $p$ correspondente. Como
 
 \[
   f(x) = L(x \rightarrow x') f_s(x \rightarrow x' \rightarrow x'') G(x
@@ -274,74 +274,112 @@ amostragem e a distribuição $p$ correspondente à ela. Como
 \]
 
 e precisamos que $p$ seja parecida com $f$, podemos fazer com que $p$ seja
-proporcional à $f_s$, o BSDF. Essa estratégia clássica é chamada de
-\emph{Amostragem por BSDF}. Vamos chamar a distribuição de probabilidade dela
-de  $p_b$.
+baseada no BSDF. Essa estratégia clássica é chamada de \emph{Amostragem por
+BSDF}. Vamos chamar a distribuição de probabilidade dela de  $p_b$.
 
 Ela, como qualquer estratégia de amostragem, funciona bem (possui pouca
 variância) quando os outros termos de $f$ são aproximadamente uniformes e a
-forma de $f$ se aproxima à de $p_b$. Isso acontece, principalmente, quando $L$ em
-sí é aproximadamente uniforme.
+forma de $f$ se aproxima da de $p_b$. Isso acontece, principalmente, quando $L$
+por si só é aproximadamente uniforme.
 
 Alguns casos onde a amostragem por BSDF se destaca são
 
 \begin{itemize}
-  \item Cenas em céu aberto, onde o próprio céu é visto como uma fonte de luz.
-    Isso acontece pois quase todas as direções tem algum valor de radiância.
-    Assim o termo com mais impacto na forma de $f$ é o próprio BSDF.
-  \item Materiais reflexivos, como metais e espelhos. Nesse caso, os BDSF
-    desses materiais costumam ser bastante radicais, pois para haver a formação
-    de uma imagem de reflexão, é necessário que a maior parte da contribuição venha
-    de raios que o ângulo de inciência seja o mesmo do ângulo de reflexão, logo
+  \item Cenas em céu aberto, onde o próprio céu é visto como uma
+      fonte de luz. Isso acontece pois quase todas as direções possuem algum
+      valor de radiância. Assim o termo com mais impacto na forma de $f$ é o
+      próprio BSDF.
+  \item Materiais reflexivos, como metais e espelhos. Nesse
+      caso, os BSDFs costumam apresentar picos bastante acentuados em torno
+      da direção de reflexão especular. Assim, a forma de $f$ passa a ser
+      dominada pelo BSDF, tornando a amostragem por BSDF particularmente
+      eficiente.
 \end{itemize}
 
-Existem casos, porém, que a amostragem por BSDF não é a ideal. Em uma cena com
-somente uma pequena fonte de luz, por exemplo, a chance de ``batermos'' na
-fonte de luz, amostrando baseado na distribuição do BSDF, é muito pequena. Uma
-cena noturna, portanto, com apenas a luz da lua e de alguns postes, precisaria
-de muitas amostras para convergir para o resultado real. Olhando na definição
-de $f$, a presença de apenas poucas luzes na cena se traduz no fato de que $L$
-terá picos em algumas direções (direção das fontes de luz) e será próxima de
-zero em outras direções. Assim, o termo $L$ `ganha' do termo $f_s$, e $f$ deixa
-de ter o formato de $p_l$, consequentemente aumentando a variância de forma
-significante.
+Existem casos, porém, em que a amostragem por BSDF não é a ideal. Em uma cena
+com somente uma pequena fonte de luz, por exemplo, a chance de ``batermos'' na
+fonte de luz, amostrando de acordo com a distribuição do BSDF, é muito pequena.
+Uma cena noturna, portanto, com apenas a luz da lua e de alguns postes,
+precisaria de muitas amostras para convergir para o resultado real. Olhando na
+definição de $f$, a presença de poucas luzes na cena se traduz no fato de que
+$L$ terá picos em algumas direções (direções das fontes de luz) e será próxima
+de zero em outras direções. Assim, o termo $L$ passa a dominar a forma de $f$,
+que deixa de se assemelhar a $p_b$, aumentando consequentemente a variância do
+estimador.
 
 Uma forma de resolver esse problema é usar outra estratégia de amostragem, como
-por exemplo a \emph{Amostragem de Iluminação}, amostrada em relação a
-distribuição de probabilidade $p_l$. Nessa estratégia amostramos um ponto da
-superfície de uma das fontes de luz da cena e continuamos nessa direção. Assim
-garantimos que estaremos em uma direção em que, caso não haja obstrução, o
-valor de $L$ será significativo.
+por exemplo a \emph{Amostragem de Fontes de Luz}, com distribuição de
+probabilidade $p_l$. Nessa estratégia, amostramos um ponto da superfície de uma
+das fontes de luz da cena e geramos uma direção em direção a esse ponto. Dessa
+forma, garantimos que a amostra estará direcionada para uma região em que, caso
+não haja obstrução, o valor de $L$ será significativo.
 
-Exemplos de casos que melhor aproveitam a amostragem de iluminação são
+Exemplos de casos que melhor aproveitam a amostragem de fontes de luz são
 
 \begin{itemize}
-  \item Materiais com BSDF quase uniforme, ou seja, materiais foscos. Como BSDF
-    é uniforme, o formato de $f$ é dado por $L$.
-  \item Casos em que o termo de geometria seja simples, ou seja, que não haja
-    muitos objetos obstruindo as fontes de luz.\footnote{No caso da amostragem
-    por BSDF, por outro lado, como seguimos na direção amostrada até chegar no
-    próximo ponto, nunca teremos uma obstrução, então o termo de geometria é
-    capturado perfeitamente.}
-\end{itemize}
+  \item Materiais com BSDF quase uniforme, ou seja, materiais
+    foscos. Como o BSDF é aproximadamente uniforme, o formato de $f$ é dado por
+  $L$.
+\item Casos em que o termo de geometria seja simples, ou seja, que não
+    haja muitos objetos obstruindo as fontes de luz.\footnote{No caso da
+    amostragem por BSDF, por outro lado, como seguimos na direção amostrada até
+chegar no próximo ponto, nunca teremos uma obstrução, então o termo de
+geometria é capturado perfeitamente.} \end{itemize}
 
 Nesse trabalho, iremos utilizar essas duas estratégias de amostragem. Fazemos
-essa escolha pela relativa simplicidade de implementação e pelo fato de que as
-duas combinadas (ver próximas sessões) conseguem trazer um resultado
-satisfatório. Porém, existem outros métodos usados para amostragem, inclusive
-trata-se de uma das áreas com mais pesquisas recentemente \citep{lin22, yan25}. 
-
+essa escolha devido à relativa simplicidade de implementação e ao fato de que,
+quando combinadas (ver próximas sessões), essas estratégias produzem resultados
+satisfatórios em uma ampla variedade de cenas. Porém, existem outros métodos
+usados para amostragem, inclusive trata-se de uma das áreas com mais pesquisas
+recentemente \citep{lin22, yan25}. 
 
 [TODO: imagem com bsdf * le para cenas com poucas luzes pequenas e com luzes grandes]
 
-
 \section{AMOSTRAGEM DE IMPORTÂNCIA MÚLTIPLA}
 
-Com a sessão anterior, temos duas maneiras de conseguir amostras para nosso
-estimador de Monte Carlo, um com a Amostragem por BSDF e outro com Amostragem
-de Iluminação. Cada uma delas funciona melhor em certos casos - e é interessante notar que em casos praticamente excludentes.
+Com a sessão anterior, obtemos duas maneiras de conseguir amostras para nosso
+estimador de Monte Carlo, uma com a Amostragem por BSDF e outro com Amostragem
+de Fontes de Luz. Cada uma dessas estratégias funciona melhor em certos casos,
+e é interessante notar que esse casos são excludentes: quando a estratégia de
+amostragem de fontes de luz é melhor, a estratégia por BSDF é pior, e
+vice-versa.
 
-TODO: explicar que somar apenas as samples com um peso fixo w = 1 ou w = 1/2 tem muita variancia.
+Nosso estimador Monte Carlo espera apenas uma técnica de amostragem com uma
+distribuição de probabilidade correspondente, então precisamos de um jeito de
+combinar as duas técnicas.
+
+Nesse trabalho usaremos o método formalizado por \citet{veach95} e que é
+amplamente utilizado. Os autores mostram que qualquer maneira de combinar duas
+amostras de distribuições diferentes pode ser representado com o seguinte
+estimador:
+
+\[
+  I_N = \sum_{i=1}^n \frac{1}{n_i} \sum_{j=1}^{n_i} w_i(X_{i,j})
+    \frac{f(X_{i,j})}{p_i(X_{i,j})}
+\]
+
+Onde cada $i$ corresponde a uma técnica de amostragem, $n_i$ o número de
+amostras utilizadas usando essa técnica, $p_i$ a distribuição de probabilidade
+correspondente, $w_i$ uma função de peso que escolheremos e $X_{i,j}$ para a
+$j$-ésima amostra obtida da técnica $i$. 
+
+Os pesos $w_i$ necessitam atender duas condições. A primeira é que $\sum_i
+w_i(x) = 1$ sempre que $f(x) \not = 0$. A segunda é que $w_i(x) = 0$ sempre que
+$p_i(x) = 0$. Essas condições garantem que o estimador não seja enviesado.
+
+Neste trabalho usaremos sempre apenas uma amostra por técnica, então podemos
+simplificar o estimador para 
+
+\[
+  I_N = \sum_{i=1}^n w_i(X_{i,j}) \frac{f(X_i)}{p_i(X_i)}
+\]
+
+A escolha
+
+
+
+
+
 
 
 
