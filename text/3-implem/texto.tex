@@ -1,0 +1,368 @@
+\chapter{Implementação}
+\label{cap:implem}
+
+% figuras estão no subdiretório "figuras/" dentro deste capítulo
+\graphicspath{\currfiledir/figuras/}
+
+A implementação do Path Tracer foi feita a partir de um Ray Tracer básico,
+implementado seguindo o texto de \citet{shirley25}. A partir dele foram feitas
+modificações principalmente para incorporar as diferentes técnicas de
+amostragem e a combinação delas por meio do amostragem de importância múltipla.
+Além disso foram implementadas algumas imagens para visualizar a contribuição
+de cada método e a vâriancia em cada pixel, além de outros materiais e suas
+correspondentes distribuições de probabilidade.
+
+A saída do programa são três imagens:
+
+\begin{description}
+  \item[output.png] A imagem gerada pelo algoritmo de Path Tracing.
+  \item[variance.png] Uma imagem gerada com valores de variância de cada pixel,
+    permitindo achar locais onde podemos melhorar nosso algoritmo.
+  \item[mis\_viz] Uma imagem de visualização das técnicas de amostragem, onde
+    cada pixel é colorido conforme a técniaca usada.
+\end{description}
+
+O código foi produzido na linguagem \emph{Rust}, usando o compilador \texttt{rustc},
+versão \texttt{1.96.0}.
+
+\section{Arquitetura}
+
+Seguindo \citet{shirley25} temos alguns módulos, cada qual em um arquivo. Eles
+são
+
+\begin{description}
+  \item[main.rs] Ponto de entrada do programa, é onde está o
+código de \emph{setup} inicial, assim como a descrição da cena e a função
+principal que irá estimar a equação da renderização.
+  \item[utils.rs] Módulo de utilidades, possui funções para obter números
+    aleatórios e algumas funções de operações comuns em vetores.
+  \item[vec3.rs] Possui a definição da estrutura de dados \texttt{Vec3} e
+    seus métodos, que serão usados amplamente no programa.
+  \item[hittable.rs] Define a interface \texttt{Hittable}, que abstrai um
+    elemento da cena que pode ser atingido por um raio de luz. Além disso
+    também define o \texttt{HittableList}, uma coleção de elementos
+    \texttt{Hittable}.
+  \item[sphere.rs] Define a estrutura de dados \texttt{Sphere}, que representa
+    uma esfera na cena. Além disso implementa a interface \texttt{Hittable}
+    para ela, permitindo que ela apareça na cena.
+  \item[ray.rs] Define a estrutura de dados \texttt{Ray}, que representa um
+    raio com um ponto de início e uma direção.
+  \item[material.rs] Possui a implementação dos BRDFs utilizados, uma função
+    para amostragem baseada em cada BRDF e também a distribuição de
+    probabilidade correspondente a cada essa amostragem. Também usamos essa
+    interface para fontes de luz, e definimos uma fonte de luz difusa.
+  \item[light\_sampler.rs] Possui a definição da estrutura de dados do
+    \texttt{LightSampler}, que permitirá amostrar pontos em uma fonte de luz. 
+  \item[camera.rs] Define a estrutura \texttt{Camera}, e implementa a função
+    que gerará os raios iniciais para cada pixel, baseados nos parâmetros da
+    estrutura.
+\end{description}
+
+
+\section{Laço principal}
+
+No arquivo \texttt{main.rs} temos o laço principal do programa, descrito no
+Algoritmo \ref{alg:mainloop}. Nele, iteramos por todos os pixels, para cada um
+obtemos um raio inicial com base na câmera, computamos o integrando $N$
+vezes usando a função \texttt{L()}, e, finalmente, normalizamos e computamos
+valores como a média, a variância e a cor da imagem de visualização.
+
+\begin{algorithm}
+\caption{Laço principal}
+\label{alg:mainloop}
+\begin{algorithmic}[1]
+
+\For{$j = 0$ até altura $-1$}
+\For{$i = 0$ até largura $-1$}
+
+    \State \text{média} $\gets 0$
+    \State \text{M2} $\gets 0$
+    \State \text{mis\_viz} $\gets 0$
+
+    \For{$k = 1$ até $N$}
+        \State \text{raio} $\gets \Call{NovoRaio}{camera, i, j}$
+
+        \State $(\text{radiância}, \text{mis}) \gets \Call{L}{\text{raio}, \text{world}, \text{lights}}$
+
+        \State $\text{delta} \gets \text{radiância} - \text{média}$
+        \State \text{média} $\gets \text{média} + \text{delta} / k$
+        \State \text{M2} $\gets \text{M2} + \text{delta} \cdot (\text{radiância} - \text{média})$
+        \State \text{mis\_viz} $\gets \text{mis\_viz} + \text{mis}$
+
+    \EndFor
+
+    \State \text{variância} $\gets \text{M2} / N$
+    \State \text{mis\_viz} $\gets \text{mis\_viz} / N$
+
+    \State \text{EscreverPixel}(i, j, \text{média}, \text{variância}, \text{mis\_viz})
+
+\EndFor
+\EndFor
+
+\end{algorithmic}
+\end{algorithm}
+
+Aqui $média$ é a estimativa de Monte Carlo para a radiância; $variância$ é a
+variância empírica de cada pixel, obtida pelo algoritmo de
+Welford\footnote{Usamos esse algoritmo para evitar problemas de instabilidade
+numérica, já que, calculando usando a fórmula clássica, $\left\langle (X -
+\langle X \rangle)^2 \right\rangle$, acabamos fazendo a subtração de dois
+números potencialmente muito próximos, o que aumenta significantemente a
+magnitude de erros numéricos.} \citep{welford62}; e $mis\_viz$ se refere à um
+valor que codifica de qual estratégia de amostragem obtivemos a contribuição
+naquele pixel. 
+
+É importante ressaltar que, na implementação, as grandezas radiométricas são
+representadas por vetores RGB (\texttt{Vec3}). Dessa forma, os cálculos
+descritos anteriormente são executados independentemente para os canais
+vermelho, verde e azul. Assim, variáveis como radiância, média, e variância
+armazenam três valores escalares, correspondentes às contribuições de cada
+canal para a cor final do pixel.
+
+\section{A função $L$}
+
+A função $L$, para estimar valor da radiância na direção dada, fará a soma
+ponderada das contribuições dos diversos caminhos amostrados, utilizando a
+amostragem de importância múltipla da seção \ref{sec:mis}.
+
+\subsection{Formulação do estimador de importância múltipla}
+
+A ideia é criarmos um caminho base, amostrando cada ponto usando a amostragem
+por BRDF. Porém, a cada ponto amostrado, também amostramos as fontes de luz,
+criando novos caminhos completos a partir da mesma base. Assim para o caminho
+base $(x_1, \ldots, x_{k - 1})$ iremos efetivamente amostrar os caminhos
+
+\begin{gather*}
+  (x_1, x_{L,2}), \\
+  (x_1, x_2, x_{L,3}), \\
+  (x_1, x_2, x_3, x_{L,4}), \\
+  \vdots \\
+  (x_1, \ldots, x_{k-1}, x_{L,k})
+\end{gather*}
+
+onde $x_i$ são os pontos do caminho base e $x_{L,i}$ são os pontos amostrados
+de fontes de luz em cada passo. Além desses caminhos, temos que contar também
+os casos que, ao amostar por BRDF, amostramos um ponto em uma fonte de luz.
+Nesse caso, o caminho base termina precocemente.
+
+Assim, temos duas possíveis maneiras de amostrar cada caminho - uma é com o
+último vértice do caminho sendo obtido pela amostragem de fontes de luz; a
+outra é com ele sendo amostrado pelo BRDF. Por esse motivo, teremos que
+utilizar a amostragem de importância múltipla para combinar as técnicas.
+
+Observe, também, que podemos escrever cada técnica de amostragem de
+\emph{caminhos} em uma tupla $(k, T)$, com $k \in \mathbb{N}$ e $T \in  \{L,
+B\}$, $k$ representando o tamanho do caminho completo e $T$ representando a
+técnica de amostragem usada para obter o último vértice do caminho amostrado.
+
+Relembrando a equação \ref{eq:misestimator}, temos
+
+\[
+  I = \sum_{i=1}^n w_i(X_{i}) \frac{f(X_i)}{p_i(X_i)}
+\]
+
+Para um caminho completo $\bar{x} = (x_1, \ldots, x_k)$, sendo $x_k$ um ponto
+em uma fonte de luz, temos
+
+\[
+  f(\bar{x}) = L_e(x_{k}) \left( \prod_{i=2}^{k-1} f_s(x_{i-1} \rightarrow
+  x_{i} \rightarrow x_{i+1}) \cos \theta_{i+1} \right) 
+\]
+
+Para as probabilidades dos caminhos, vamos chamar $p_{k,L}$ a probabilidade de
+um caminho ter sido amostrado com seu último vértice por amostragem de fontes
+de luz e $p_{k,B}$ a probabilidade com o último vértice utilizando a amostragem
+por BRDF. Assim
+
+\begin{align*}
+  p_{k,B}(\bar{x}) &= p_B(x_0)p_B(x_1 \mid x_0) \ldots p_B(x_k \mid x_{k-1})\\
+  p_{k,L}(\bar{x}) &= p_B(x_0)p_B(x_1 \mid x_0) \ldots p_L(x_k \mid x_{k-1})
+\end{align*}
+
+Note que $p_{k,L}$ e $p_{k,B}$ diferem apenas no último termo. Sendo $T \in \{B, L\}$ temos
+
+\[
+  w_{k,T}(\bar{x}) = \frac{p_{k,T}(\bar{x})^2}{p_{k,B}(\bar{x})^2 +
+  p_{k,L}(\bar{x})^2} = \frac{p_T(x_k \mid x_{k-1})^2}{p_B(x_k \mid x_{k-1})^2
+  + p_L(x_k \mid x_{k-1})^2}
+\]
+
+e então podemos escrever
+
+\[
+  I = \sum_{i=1}^n w_{k,T}(X_{i}) \frac{f(X_i)}{p_{k,T}(X_i)}
+\]
+
+\subsection{Implementação}
+
+A função $L$ é implementada como um \emph{loop} infinito, saindo dele em três
+ocasiões:
+
+\begin{itemize}
+  \item O raio não intersecta nenhuma geometria (ele ``foge da cena'').
+  \item O raio atinge um material emissivo. Nesse caso adicionamos a
+    contribuição, ponderada corretamente com $w_{\text{k},B}$.
+  \item O algoritmo de Roleta Russa decide encerrar o caminho atual.
+\end{itemize}
+
+Caso nenhum desses casos não aconteçam, amostramos um ponto nas fontes de luz e
+adicionamos sua contribuição com $w_{\text{k}, L}$. Em seguida, amostramos o
+BRDF do material atual para obter o próximo ponto do caminho base, atualizamos
+as variáveis, e reiniciamos o laço.
+
+A variável \texttt{peso} guardará, na $n$-ésima iteração, o valor correspondente a 
+
+\[
+  \frac{ \prod_{i=2}^{n-1} f_s(x_{i-1} \rightarrow x_{i} \rightarrow x_{i+1})
+  \cos \theta_{i+1}}{p_B(x_0)p_B(x_1 \mid x_0) \ldots p_B(x_n \mid x_{n-1})}
+\]
+
+que é o valor comum, entre todos os próximos vértices, do termo
+$\frac{f(X_i)}{p_{k,T}(X_i)}$ de $I$. Dessa forma, não precisamos guardar os
+valores de cada vértice e temos um custo de memória constante.
+
+Os trechos \texttt{AvaliaEmissao}, \texttt{AmostrarLuz} e \texttt{RoletaRussa}
+serão desenvolvidos nas próximas seções.
+
+\begin{algorithm}
+\caption{Função L}
+\begin{algorithmic}[1]
+  \Function{L}{raio, mundo, luzes}
+  \State $\text{profundidade} \gets 0$
+  \State $\text{radiancia} \gets 0$
+  \State $\text{peso} \gets 1$
+  \Loop
+    \State $hit \gets \Call{Intersecta}{\text{raio}, \text{mundo}}$
+    \If{$hit$}
+      \State $\Call{AvaliaEmissao}{hit.material, \text{profundidade}, \text{peso}, \text{luzes}}$
+
+      \State \Call{AmostrarLuz}{$hit$, peso, mundo, luzes}
+
+      \State \Call{RoletaRussa}{profundidade, peso}
+
+      \State $(\text{proximoRaio}, f_s, p_b) \gets \Call{amostrar}{hit.material}$
+
+      \State $\text{peso} \gets \text{peso} \cdot f_s \cdot \cos \theta / p_b$
+      \State $\text{raio} \gets \text{proximoRaio}$
+      \State $\text{profundidade} \gets \text{profundidade} + 1$
+    \Else
+    \State \textbf{break}
+    \EndIf
+  \EndLoop
+  \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{\texttt{AvaliaEmissao}}
+
+A função \texttt{AvaliaEmissao} verifica se o ponto atual, amostrado pelo BRDF na
+iteração passada, emite radiância. Se não emite, a execução continua sem
+alteração. Caso contrário, precisamos adicionar a contribuição à estimativa.
+
+No caso de emitir, existem três possibilidades:
+
+\begin{itemize}
+  \item É a primeira iteração. Nesse caso, só há uma maneira de amostrar esse
+    caminho, que sai diretamente do sensor até a fonte de luz. Portanto, não é
+    utilizado os pesos da amostragem de importância múltipla.
+  \item O último material possuia um BRDF que continha uma função $\delta$ de
+    Dirac.\footnote{Um exemplo de material que utiliza uma função $\delta$ é o
+    BRDF de um espelho perfeito. O valor dele é $1$ apenas na direção de
+    perfeita reflexão.} Nesse caso, $p_{k,L}$ será sempre 0 (a probabilidade de
+    um ponto amostrado numa fonte de luz ter a direção correta é 0). Assim, a
+    única forma de amostrar esse caminho é por meio da amostragem por BRDF e,
+    portanto, também não usamos os pesos de amostragem múltipla nesse caso.
+  \item No terceiro caso, temos uma amostra que também pode ser gerada pela
+    amostragem de fontes de luz. Logo, precisamos utilizar os pesos da
+    amostragem múltipla. Para isso, no material emissivo, temos uma função que
+    retorna a $p_{k,L}$ daquela fonte de luz. Combinando com $p_{k,B}$ obtido
+    da amostra de BRDF da iteração anterior, conseguimos calucular $w_{k,B}$.
+\end{itemize}
+
+\begin{algorithm}
+\caption{Função AvaliaEmissao}
+\begin{algorithmic}[1]
+  \Function{AvaliaEmissao}{material, profundidade, peso, luzes}
+  \If{material.emissivo}
+    \If{profundidade = 0}
+      \State $\text{radiancia} \gets \text{radiancia} + \text{material.emitido}$
+    \ElsIf{material anterior era delta}
+      \State $\text{radiancia} \gets \text{radiancia} + \text{peso} \cdot \text{material.emitido}$
+    \Else
+      \State $p_L \gets \text{material.pl}$
+      \State $w \gets p_B^2 / (p_B^2 + p_L^2)$
+      \State $\text{radiancia} \gets \text{radiancia} + w \cdot \text{peso} \cdot \text{material.emitido}$
+    \EndIf
+    \State \textbf{break}
+  \EndIf
+  \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\section{\texttt{AmostrarLuz}}
+
+Nessa parte, já sabemos que o material atual não é emissivo, então podemos
+amostrar uma fonte de luz para obter um possível caminho completo. Para isso
+usamos a estrutura \texttt{LightSampler}, que retorna um ponto na fonte de luz
+e a probabilidae $p_L$, na medida de área, de amostra-lo.
+
+Em seguida, verificamos se há alguma obstrução entre o ponto na fonte de luz
+amostrado e o ponto atual (que foi amostrado pelo BRDF na iteração anterior).
+Se existir uma obstrução, continuamos para o resto do \emph{loop}, sem
+adicionar nenhuma contribuição. Caso contrário, verificamos o BRDF para obter
+seu valor e o $p_B$ do ponto atual. Além disso, convertemos o $p_L$, que está
+em medida de área, para a medida de ângulo sólido. Com isso conseguimos
+calcular o peso $w_{k, L}$ e portanto a contribuição para esse caminho.
+
+\begin{algorithm}
+\caption{Função AmostrarLuz}
+\begin{algorithmic}[1]
+  \Function{AmostrarLuz}{hit, peso, mundo, luzes}
+  \State $(\text{posicaoLuz}, \text{materialLuz},p_L^A) \gets \Call{amostrar}{\text{luzes}}$
+  \State $\text{obstruido} \gets \Call{obstruido}{\text{hit.pos}, \text{posicaoLuz}}$
+  \If{\textbf{not} obstruido}
+    \State $f_s \gets \Call{BRDF}{\text{hit.material}, \text{posicaoLuz}}$
+    \State $p_B \gets \Call{PDF}{\text{hit.material}, \text{posicaoLuz}}$
+    \State $p_L \gets \Call{ConverterParaAnguloSolido}{p_L^A, \text{hit}, \text{posicaoLuz}}$
+    \State $w \gets p_L^2 / (p_B^2 + p_L^2)$
+    \State $\text{radiancia} \gets \text{radiancia} + w \cdot \text{peso} \cdot
+      f_s \cdot \cos \theta \cdot \text{materialLuz.emitido} / p_L$
+  \EndIf
+  \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{\texttt{RoletaRussa}}
+
+Para evitar caminhos muitos grandes, visto que quanto maior o caminho menor a
+contribuição na imagem final, utilizamos o método de Roleta Russa
+\citep{arvo90} para terminar o caminho sem enviesar o estimador.
+
+\begin{algorithm}
+\caption{Função RoletaRussa}
+\begin{algorithmic}[1]
+  \Function{RoletaRussa}{profundidade, peso}
+  \If{$\text{profundidade} \ge \text{profundidadeMinima}$}
+    \State q $\gets \Call{ComponenteMax}{peso}$
+    \If{$\Call{Random}{} \ge \text{q}$}
+      \State peso $\gets \text{peso} / \text{q}$
+    \EndIf
+  \EndIf
+  \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{Conclusão}
+
+Neste capítulo apresentamos a implementação do integrador de Path Tracing
+desenvolvido nesse trabalho. A partir de um Ray Tracer básico foram
+incorporadas técnicas de redução de variância, como a amostragem de fontes de
+luz (NEE), amostragem por BSDF, sua combinação utilizando amostragem de
+importância múltipla e a técnica de Roleta Russa. 
+
+Também foi apresentada a formulação dos caminhos amostrados pelo integrador,
+juntamente com suas distribuições de probabilidade, os pesos utilizados pela
+amostragem de importância múltipla e as  contribuições de radiância associadas
+a cada caminho.
+

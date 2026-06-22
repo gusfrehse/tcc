@@ -145,7 +145,7 @@ solução analítica fechada para cenas arbitrárias. É essa dificuldade que mo
 o uso de métodos de Monte Carlo para aproximar numericamente a solução, como
 faremos nas seções seguintes.
 
-\section{INTEGRAÇÃO COM O MÉTODO DE MONTE CARLO}
+\section{Integração Com O Método De Monte Carlo}
 
 Como visto na seção anterior, para resolver o problema da renderização
 precisamos resolver uma integral especialmente complicada. Tirando em casos
@@ -263,7 +263,7 @@ e assim podemos fazer um estimador Monte Carlo
   I_N = \frac{1}{N} \sum_{i=1}^N \frac{f(X_i)}{p(X_i)}
 \]
 
-\section{TÉCNICAS DE AMOSTRAGEM}
+\section{Técnicas De Amostragem}
 
 Ao usar o estimador da última seção, porém, precisamos escolher uma técnica de
 amostragem e a distribuição $p$ correspondente. Como
@@ -312,7 +312,9 @@ por exemplo a \emph{Amostragem de Fontes de Luz}, com distribuição de
 probabilidade $p_l$. Nessa estratégia, amostramos um ponto da superfície de uma
 das fontes de luz da cena e geramos uma direção em direção a esse ponto. Dessa
 forma, garantimos que a amostra estará direcionada para uma região em que, caso
-não haja obstrução, o valor de $L$ será significativo.
+não haja obstrução, o valor de $L$ será significativo. Essa técnica, também
+comumente chamada de \emph{Next Event Estimation} (NEE), provém da literatura
+de transporte de partículas da Física \citep{coveyou67}.
 
 Exemplos de casos que melhor aproveitam a amostragem de fontes de luz são
 
@@ -335,28 +337,29 @@ recentemente \citep{lin22, yan25}.
 
 [TODO: imagem com bsdf * le para cenas com poucas luzes pequenas e com luzes grandes]
 
-\section{AMOSTRAGEM DE IMPORTÂNCIA MÚLTIPLA}
+\section{Amostragem De Importância Múltipla}
+\label{sec:mis}
 
-Com a sessão anterior, obtemos duas maneiras de conseguir amostras para nosso
-estimador de Monte Carlo, uma com a Amostragem por BSDF e outro com Amostragem
-de Fontes de Luz. Cada uma dessas estratégias funciona melhor em certos casos,
-e é interessante notar que esse casos são excludentes: quando a estratégia de
-amostragem de fontes de luz é melhor, a estratégia por BSDF é pior, e
-vice-versa.
+Na seção anterior, apresentamos duas maneiras de obter amostras para nosso
+estimador de Monte Carlo, uma por meio da Amostragem por BSDF e outro por meio
+da Amostragem de Fontes de Luz. Cada uma dessas estratégias funciona melhor em
+certos casos, e é interessante notar que esses casos são, em grande parte,
+complementares: quando a estratégia de amostragem de fontes de luz é melhor, a
+estratégia por BSDF é pior, e vice-versa.
 
 Nosso estimador Monte Carlo espera apenas uma técnica de amostragem com uma
 distribuição de probabilidade correspondente, então precisamos de um jeito de
 combinar as duas técnicas.
 
 Nesse trabalho usaremos o método formalizado por \citet{veach95} e que é
-amplamente utilizado. Os autores mostram que qualquer maneira de combinar duas
-amostras de distribuições diferentes pode ser representado com o seguinte
-estimador:
+amplamente utilizado. Os autores mostram que uma grande classe de estratégias
+para combinar $n$ amostras provenientes de diferentes distribuições pode ser
+representado com o seguinte estimador:
 
-\[
-  I_N = \sum_{i=1}^n \frac{1}{n_i} \sum_{j=1}^{n_i} w_i(X_{i,j})
+\begin{equation*}
+  I = \sum_{i=1}^n \frac{1}{n_i} \sum_{j=1}^{n_i} w_i(X_{i,j})
     \frac{f(X_{i,j})}{p_i(X_{i,j})}
-\]
+\end{equation*}
 
 Onde cada $i$ corresponde a uma técnica de amostragem, $n_i$ o número de
 amostras utilizadas usando essa técnica, $p_i$ a distribuição de probabilidade
@@ -370,210 +373,95 @@ $p_i(x) = 0$. Essas condições garantem que o estimador não seja enviesado.
 Neste trabalho usaremos sempre apenas uma amostra por técnica, então podemos
 simplificar o estimador para 
 
-\[
-  I_N = \sum_{i=1}^n w_i(X_{i,j}) \frac{f(X_i)}{p_i(X_i)}
-\]
-
-A escolha
-
-
-
-
-
-
-
-
-%=====================================================
-
-\section{Estrutura do texto}
-
-Para melhorar a legibilidade do texto, deve ser evitado o uso de subdivisões mais profundas que a subseção (por exemplo, subsubseções). Se elas forem absolutamente necessarias, não devem ser numeradas. Deve-se analisar a possibilidade de uso de uma lista de itens em seu lugar. O número de níveis de texto do documento não deve exceder três: capítulo, seção e subseção. O uso de mais que três níveis dificulta a leitura e prejudica muito a estética do texto.
-
-%=====================================================
-
-\section{Estilo de redação}
-
-Ao elaborar o texto da dissertação ou da tese, o mais indicado é o uso do verbo na forma impessoal. Exemplos:
-
-\begin{itemize}
-\item ... utilizaram-se os seguintes dados ...
-\item ... elaborou-se de forma precisa ...
-\item ... trata-se os algoritmos ...
-\item ... foram obtidos resultados significativos ...
-\end{itemize}
-
-Além disso, deve-se a todo custo evitar a ``linguagem de revista'', com expressões como ``sensacional'', ``impressionante'', ``monstruoso'', etc (por exemplo: ``Os resultados obtidos são sensacionais, sobretudo considerando a monstruosa margem de erro.'').
-
-%=====================================================
-
-\section{Alguns exemplos}
-
-Esta seção traz algus exemplos de elementos típicos de um texto científico, como figuras, tabelas e fórmulas matemáticas.
-
-%=====================================================
-
-\subsection{Exemplo de figura}
-
-A forma sugerida para incluir figuras em um documento \LaTeX\ é importá-las usando o pacote \texttt{graphicx}. Como formatos gráficos sugere-se:
-
-\begin{itemize}
-
-\item Formatos \emph{raster}, como PNG (\emph{Portable Network Graphics}) ou JPG (\emph{Joint Photographic Experts Group}) para fotografias; procure usar uma resolução de ao menos 150 dpi (\emph{dots per inch}).
-
-\item Formatos vetoriais, como PDF (\emph{Portable Document Format}) ou EPS (\emph{Extended PostScript}) para diagramas e gráficos\footnote{NUNCA use JPG ou GIF para desenhos vetoriais, pois o resultado final geralmente fica borrado.}.
-
-\end{itemize}
-
-A maior parte das ferramentas permite exportar figuras nesses formatos (a figura do exemplo foi produzida com o \emph{Inkscape}, um programa livre multiplataforma). A figura \ref{fig:comun-intra-inter} mostra um exemplo de inclusão de figura em PDF.
-
-% exemplo de inserção de figura
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=12cm]{exemplo-figura.pdf}
-\caption{Comunicação inter-processos.}
-\label{fig:comun-intra-inter}
-\end{figure}
-
-
-%=====================================================
-
-\subsection{Exemplo de tabela}
-
-Tabelas são elementos importantes de um documento. No \LaTeX\ as tabelas podem ser objetos flutuantes (definidas no ambiente \texttt{table} e referenciadas por números usando \texttt{label} e \texttt{ref}) ou objetos fixos simples, criados pelo ambiente \texttt{tabular}. A tabela \ref{tab:modelos} é um exemplo de tabela flutuante, cuja posição no texto pode variar em função das quebras de página.
-
-\begin{table}[!htp]
-\centering
-\caption{Os 16 modelos centrais do UCON$_{\mathrm{ABC}}$}
-\label{tab:modelos}
-\begin{tabular}{|c|cccc|}
-\cline{2-5}
-\multicolumn{1}{c|}{}& 0 (imutável) & 1 (\emph{pre-update}) & 2 (\emph{on-update}) & 3 (\emph{pos-update}) \\
-\hline
-\texttt{preA} & \textbullet & \textbullet & -- & \textbullet \\
-\hline
-\texttt{onA} & \textbullet & \textbullet & \textbullet & \textbullet \\
-\hline
-\texttt{preB} & \textbullet & \textbullet & -- & \textbullet \\
-\hline
-\texttt{onB} & \textbullet & \textbullet & \textbullet & \textbullet \\
-\hline
-\texttt{preC} & \textbullet & -- & -- & -- \\
-\hline
-\texttt{onC} & \textbullet & -- & -- & -- \\
-\hline
-\end{tabular}
-\end{table}
-
-%=====================================================
-
-\subsection{Exemplo de fórmula}
-
-Equações destacadas devem ser numeradas como mostra a equação \ref{eq:relatividade}:
-
 \begin{equation}
-E = m \times c^2
-\label{eq:relatividade}
+  I = \sum_{i=1}^n w_i(X_{i}) \frac{f(X_i)}{p_i(X_i)}
+  \label{eq:misestimator}
 \end{equation}
 
-%=====================================================
+A escolha dos pesos é uma área ativa de pesquisa em computação gráfica
+\citep{kondapaneni19, hua25, muller19}. Neste trabalho, porém, utilizaremos a
+\emph{Power Heuristic} trazida por Veach, por sua simplicidade de implementação
+e seu amplo emprego na literatura. Essa heurística é dada por
 
-\subsection{Exemplos de código-fonte}
+\[
+  w_i = \frac{p_i(X_i)^\beta}{\textstyle \sum_j p_j(X_i)^\beta}
+\]
 
-Códigos-fonte podem ser produzidos de forma simples através do ambiente \texttt{verbatim}, como mostra este exemplo:
+onde o parâmetro $\beta$ é normalmente escolhido como $2$, valor que será
+utilizado nesse trabalho. É importante notar, também, que para calcular $w_i$,
+precisamos avaliar cada $p_j$ em nossa amostra $X_i$, que foi amostrada segundo
+a distribuição $p_i$. A intuição por trás é que a amostra $X_i$ terá mais
+contribuição quando $p_i$ for alto relativamente aos outros $p$. 
 
-\begin{footnotesize}
-\begin{verbatim}
-#include <stdio.h>
+Uma restrição, porém, é que todas as distribuições devem estar usando a mesma
+medida de probabilidade. No escopo desse trabalho vamos converter a medida de
+direções, usada na Amostragem por BSDF, para a medida de área, usada na
+Amostragem de Fontes de Luz. Essa conversão é dada pelo jacobiano da
+transformação \citep[Cap 8.2.2.2]{veach97}:
 
-int main (int argc, char *argv[])
-{
-   int i ;                           // uma variavel local
+\[
+  p_A(x) = p_\omega(\omega) \left( \frac{|\cos(\theta_i)|}{||x - x'||^2}  \right)
+\]
 
-   for (i=0; i< 100; i++)            // um laço for
-      printf ("i vale %d\n", i) ;    // uma saída na tela
-}
-\end{verbatim}
-\end{footnotesize}
+onde $p_A$ é a distribuição de probabilidade em relação à medida de área e
+$p_\omega$ a probabilidade em relação a medida de ângulo sólido.
 
-No entanto, é preferível usar pacotes especializados para a edição ou inclusão de códigos-fonte, como o pacote \texttt{listings}. Eis um exemplo de código-fonte escrito com esse pacote:
+\section{Path Tracing}
 
-% exemplo de código-fonte definido no próprio texto
+\citet{kajiya86} mostrou que métodos de Ray Tracing da época \citep{cook84,
+whitted80}, em que múltiplos raios são criados a cada intersecção,
+desnecessariamente gastam recursos computacionais em cálculos que pouco
+contribuem para valor final da integral. Intuitivamente, isso ocorre devido à
+natureza multiplicativa da equação da renderização, ao passo que a cada
+intersecção reduzimos a contribuição por fatores como o BRDF e o termo de
+geometria, deixando raios mais profundos na árvore com valor muito baixo de
+contribuição.
 
-\begin{lstlisting}
-#include <stdio.h>
+Como alternativa, Kajiya introduziu o \emph{Path Tracing}, em que não há
+ramificações e apenas um novo raio é criado a cada intersecção, assim
+efetivamente deixando mais recursos para explorar direções iniciais diferentes
+com mais contribuição, diminuindo em geral a variância. Essa lista de raios
+(que antes era uma árvore de raios e agora representada por uma tupla) é chamada
+de \emph{caminho}.
 
-int main (int argc, char *argv[])
-{
-   int i ;                           // uma variável local
+\citet{veach97} formalizou esse método com a formulação da equação de
+renderização em uma integral de caminhos, possibilitando uma amostragem formal
+e aplicação das técnicas das seções anteriores, como a amostragem de
+importância múltipla, em caminhos inteiros. O método para fazer isso consiste
+em desenrolar a recursão da integral da equação \ref{eq:render}, dado um
+caminho $\bar{x} = (x_1, \ldots, x_k)$, de tamanho $k$, temos
 
-   for (i=0; i< 100; i++)            // um laço for
-      printf ("i vale %d\n", i) ;    // uma saída na tela
-}
-\end{lstlisting}
+\begin{equation}
+  I =  \sum_{k=0}^\infty \int_{\bar{x} \in \mathcal{M}^k}
+  \left(\prod_{i=1}^{k-2} f(x_{i+2} \rightarrow x_{i+1} \rightarrow x_i)
+  G(x_{i+2} \leftrightarrow x_{i+1})\right) dA(x_1) \ldots dA(x_k).
+\end{equation}
 
-Esse pacote também permite incluir códigos-fonte de arquivos externos. Eis um exemplo:
+Note, agora, que o domínio de integração, que antes eram pontos independentes
+da geometria, virou caminhos completos das fontes de luz até os sensores. Com
+isso, formalmente, precisamos adaptar nossas técnicas de amostragem para
+obtermos caminhos, e não pontos/direções. Para fazer isso, podemos amostrar $k$
+pontos, um de cada vez, cada um utilizando uma das técnicas de amostragem. Além
+disso, precisamos de uma distribuição de probabilidade para essa amostra de
+caminho. Ela é dada por
 
-% exemplo de código-fonte incluso
+\[
+  p(\bar{x}) = p_{A,1}(x_1) \ldots p_{A,k}(x_k)
+\]
 
-\lstinputlisting{2-fundam/exemplo.c}
-
-%=====================================================
-
-\subsection{Exemplo de algoritmo}
-
-Os pacotes \texttt{algorithm} e \texttt{algorithmic} permitem formatar algoritmos facilmente. Eis um exemplo:
-
-\begin{algorithm}[H]
-\caption{Ações de $s_i$ ao encerrar um ciclo:}
-\label{alg:on-period-ending}
-\begin{small}
-\begin{algorithmic}[1]
-\FORALL{$x \in \mathcal{K}_i$}
-  \STATE{$\mathit{banned}_i(x) \gets$ FALSE}
-  \STATE{$mi_i(x) \gets 0$}
-  \STATE{$mm_i(x) \gets 0$}
-  \STATE{$\mathit{age}_i(x) \gets \mathit{age}_i(x) + 1$}
-  \IF{$\mathit{age}_i(x) = \mathit{age}_\mathit{max}$}
-     \STATE{$\mathcal{K}_i \gets \mathcal{K}_i - \{x\}$}
-     \COMMENT{``esquece'' do servidor $x$}
-     \STATE{remove as informações locais sobre $x$}
-     \STATE{envia $\mathit{notify}(x,\mathit{undef})$ ao grupo de confiança $\mathcal{T}_i$}
-  \ENDIF
-\ENDFOR
-\end{algorithmic}
-\end{small}
-\end{algorithm}
- 
-%=====================================================
-
-\subsection{Exemplos de citação}
-
-Citação curta (só um parágrafo): como afirmou Maquiavel em seu livro \emph{O Príncipe}:
-
-\begin{quote}
-``Nada é mais difícil de instituir, mais perigoso de conduzir, mais incerto no seu sucesso, do que liderar a introdução de uma nova ordem de coisas... O inovador faz inimigos em todos aqueles que prosperavam sobre as antigas regras, e somente tíbio suporte é esperado daqueles que prosperariam na novidade, porque os homens são geralmente incrédulos, nunca realmente confiam nas coisas novas, a menos que as tenham testado em experiência''.
-\end{quote}
-
-Citação longa (mais de um parágrafo): como afirmou Maquiavel em seu livro \emph{O Príncipe}:
-
-\begin{quotation}
-``Nada é mais difícil de instituir, mais perigoso de conduzir, mais incerto no seu sucesso, do que liderar a introdução de uma nova ordem de coisas...
-
-O inovador faz inimigos em todos aqueles que prosperavam sobre as antigas regras, e somente tíbio suporte é esperado daqueles que prosperariam na novidade, porque os homens são geralmente incrédulos, nunca realmente confiam nas coisas novas, a menos que as tenham testado em experiência''.
-\end{quotation}
-
-%=====================================================
-
-\section{Uma seção}
-
-\subsection{Uma subseção}
-
-\subsubsection{Uma subsubseção}
-
-%=====================================================
+onde $p_{A,i}$ representa a distribuição de probabilidade na medida de área da
+técnica de amostragem utilizada para obter o $i$-ésimo vértice do caminho
+$\bar{x}$.
 
 \section{Conclusão}
 
-Todo capítulo (com exceção da introdução e da conclusão) deve encerrar com uma pequena conclusão local, resumindo os tópicos apresentados no capítulo e preparando o leitor para o próximo capítulo (exceto se esse for a conclusão geral). Caso o capítulo tenha apresentado resultados obtidos pelo próprio autor, estes devem ser sucintamente relembrados aqui.
-
-%=====================================================
+Neste capítulo vimos os conceitos essenciais e a maquinaria matemática pelos
+quais iremos utilizar na implementação de um Path Tracer. Começando pela
+equação da renderização, onde resumimos a intuição por trás da formação de
+imagens realísticas em um equação integral recursiva; seguindo pelo método de
+Monte Carlo, que podemos usar para resolver tal equação algoritmicamente; e
+então vimos diferentes maneiras de obter amostras, cada uma com suas vantagens
+e desvantagens. Também vimos um método para combinar essas técnicas de
+amostragem, permitindo a redução de variância; e, enfim, vimos uma maneira de
+interpretar a equação da renderização como uma integral onde o domínio de
+integração são os caminhos que existem entre as fontes de luz e os sensores;

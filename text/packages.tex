@@ -62,9 +62,12 @@
 % ------------------------------------------------------------------------------
 
 % formatação de algoritmos
-\usepackage{algorithm,algorithmic}
-\IfLanguageName{brazilian} {\floatname{algorithm}{Algoritmo}}{}
-\renewcommand{\algorithmiccomment}[1]{~~~// #1}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\IfLanguageName{brazilian}{
+  \floatname{algorithm}{Algoritmo}
+}{}
 %\algsetup{linenosize=\footnotesize,linenodelimiter=.}
 
 % ------------------------------------------------------------------------------
