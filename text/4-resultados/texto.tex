@@ -1,11 +1,178 @@
-\chapter{Resultados}
+\chapter{Resultados e discussão}
 \label{cap:resultados}
 
 % figuras estão no subdiretório "figuras/" dentro deste capítulo
-\graphicspath{\currfiledir/figuras/}
+\graphicspath{{\currfiledir/figuras/}}
 
+Neste capítulo iremos apresentar e discutir os resultados obtidos com a
+implementação do integrador Path Tracer discutido no capítulo anterior.
 
+Vamos dividir em duas partes, uma com análise do estimador usando a mesma cena,
+porém com:
 
+\begin{enumerate}
+  \item Apenas a contribuição de caminhos com último vértice amostrado pelo
+  BRDF.
+  \item Apenas a contribuição de caminhos com último vértice amostrado nas
+  fontes de luz.
+  \item As duas fontes de contribuição juntas, combinadas com a Amostragem de
+  Importância Múltipla.
+\end{enumerate}
 
-Neste capítulo iremos apresentar os resultados obtidos com a implementação do
-integrador Path Tracer discutido no capítulo anterior. 
+Na outra parte, não mudaremos o estimador, porém mudaremos as fontes de luz da
+cena e analisaremos as imagens de visualização.
+
+\section{Descrição da cena de teste}
+
+A cena é composta por 6 esferas, sendo duas delas fontes de luz. Especificamente
+temos
+
+\begin{enumerate}
+  \item Esfera vermelha, com BRDF Lambertiano (perfeitamente fosco).
+  \item Esfera verde, com BRDF de um espelho perfeito.
+  \item Esfera azul, com BRDF baseado no modelo Phong de \citet{lafortune98}.
+  \item Chão, é uma esfera grande, também com BRDF Lambertiano.
+  \item Luz pequena, uma esfera pequena com material que emite luz.
+  \item Luz grande, uma esfera grande, que engloba a cena, com material que emite luz.
+\end{enumerate}
+
+As imagens foram renderizadas com tamanho 1000x1000, e com 64 chamadas da
+função $L$ por pixel.
+
+\section{Resultados com contribuições separadas}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000onlybrdf/output.png}
+    \caption{Apenas BRDF}
+    \label{fig:contrib-brdf}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000onlynee/output.png}
+    \caption{Apenas Fontes de Luz}
+    \label{fig:contrib-nee}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000/output.png}
+    \caption{MIS (BRDF + Fontes de Luz)}
+    \label{fig:contrib-mis}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000onlybrdf/variance.png}
+    \caption{Variância apenas BRDF}
+    \label{fig:var-brdf}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000onlynee/variance.png}
+    \caption{Variância apenas Fontes de Luz}
+    \label{fig:var-nee}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000/variance.png}
+    \caption{Variância MIS}
+    \label{fig:var-mis}
+  \end{subfigure}
+  \caption{Comparação das contribuições separadas.
+           À esquerda, apenas Amostragem por BRDF; ao centro, apenas Amostragem
+           de Fontes de Luz; à direita, as duas combinadas via Amostragem de
+           Importância Múltipla. Mostramos as imagens de radiância (cima) e da
+           variância (baixo).}
+  \label{fig:contrib-separadas}
+\end{figure}
+
+A \autoref{fig:contrib-separadas} compara as duas técnicas de amostragem, junto
+com a Amostragem de Importância Múltipla. Para fazer isso, para cada imagem,
+modificamos o integrador, removendo as contribuições de outros métodos de
+amostragem e removendo o peso $w$ da contribuição do método escolhido.
+
+Com os resultados, observa-se que a Amostragem por BRDF não captura
+eficientemente a contribuição da fonte de luz pequena, resultando em uma imagem
+mais escura. Isso decorre do fato de ser pequena a probabilidade da fonte de
+luz pequena ser ``acertada'' pela amostragem por BRDF. Conforme esperado,
+porém, a esfera azul possui pouca variância. Isso acontece pelo fato do BRDF de
+Phong da esfera azul ter um viés alto para direções de reflexões especulares.
+
+Na Amostragem de Fontes de Luz, temos uma representação mais fidedigna da
+iluminação dada pela fonte de luz pequena. Isso é esperado, já que, como sempre
+amostramos um ponto na luz, a probabilidade de amostrarmos um ponto na fonte de
+luz pequena é alta. Entretanto, a esfera azul agora exibe uma variância
+elevada, pois as amostras nas fontes de luz raramente estão na mesma direção
+que o lóbulo especular da BRDF de Phong.
+
+Agora, na Amostragem de Importância Múltipla, ao combinar os pontos fortes das
+duas técnicas, diminuímos significativamente a variância e ruído final. Ainda
+assim, nota-se que a esfera vermelha possui certa quantidade de variância. Isso
+acontece pois, nas duas técnicas, por BRDF e de Fontes de Luz, a variância
+daquela região é alta. Dessa forma, não temos uma técnica que é efetiva em
+amostrar aquela área, e então a variância continua alta mesmo depois da
+Amostragem de Importância Múltipla.
+
+Uma possível alternativa, que está fora do escopo desse trabalho, seria
+analisar uma nova técnica de amostragem que reduza a variância naquela área, e
+fazer a Amostragem de Importância Múltipla com três técnicas.
+
+\section{Resultados com diferentes configurações de iluminação}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{0.40\textwidth}
+    \includegraphics[width=\textwidth]{smalllight64spp1000x1000/output.png}
+    \caption{Fonte de luz pequena}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.40\textwidth}
+    \includegraphics[width=\textwidth]{smalllight64spp1000x1000/mis_viz.png}
+    \caption{Visualização da amostragem}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.40\textwidth}
+    \includegraphics[width=\textwidth]{skylight64spp1000x1000/output.png}
+    \caption{Fonte de luz grande}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.40\textwidth}
+    \includegraphics[width=\textwidth]{skylight64spp1000x1000/mis_viz.png}
+    \caption{Visualização da amostragem}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.40\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000/output.png}
+    \caption{Duas fontes de luz (cena original)}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.40\textwidth}
+    \includegraphics[width=\textwidth]{complete64spp1000x1000/mis_viz.png}
+    \caption{Visualização da amostragem}
+  \end{subfigure}
+  \caption{Cenas apenas com fonte de luz pequena (cima), com apenas a luz do
+  céu (centro) e com as duas fontes de luz (baixo). À direita, a cor de cada
+  pixel codifica a contribuição relativa de cada estratégia de amostragem.}
+  \label{fig:somelight}
+\end{figure}
+
+Na \autoref{fig:somelight} utilizamos de uma visualização para identificar os
+tipos de amostras que mais contribuem em cada pixel. Pixels com a cor vermelha
+indicam que a amostragem do caminho foi pelas fontes de luz. Já os pixels em
+cor azul, tiveram caminhos amostrados majoritariamente pelo BRDF. Finalmente,
+os pixels verdes não utilizam a Amostragem de Importância Múltipla, é o caso de
+reflexões de espelhos perfeitos e caminhos que saem do sensor diretamente para
+uma fonte de luz.
+
+Pelas imagens, podemos notar que, para a fonte de luz pequena, temos quase
+somente contribuições de amostras das fontes de luz. Apesar disso, no
+\emph{highlight} da esfera da direita, podemos notar que ainda temos certa
+contribuição de amostras por BRDF. 
+
+Na fonte de luz grande, temos quase somente contribuições de amostras por BRDF.
+Isso acontece devido ao fato de que quase todo caminho, eventualmente, vai
+acertar a fonte de luz grande, gerando uma contribuição de amostra por BRDF.
+
+Agora, na imagem com as duas fontes de luz, como esperado, temos
+predominantemente uma mistura das duas técnicas utilizadas. Com amostras de
+fontes de luz mais intensas onde há mais contribuição da fonte de luz pequena e
+amostras por BRDF onde há mais contribuição da fonte de luz grande.
+
+\section{Conclusão}
+
+Os resultados mostram que a Amostragem de Importância Múltipla, implementada
+conforme descrita no \autoref{cap:implem}, reduz efetivamente a
+variância em comparação com as técnicas de amostragem individuais, ao atribuir
+pesos maiores para amostras com menor variância e pesos menores com amostras
+com maior variância.
+
