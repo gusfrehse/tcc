@@ -1,0 +1,48 @@
+\chapter{Conclusão}
+\label{cap:conclusao}
+
+% figuras estão no subdiretório "figuras/" dentro deste capítulo
+\graphicspath{\currfiledir/figuras/}
+
+
+Neste trabalho explicamos a intuição por trás da síntese de imagens realista e
+como podemos capturar essa intuição com a Equação da Renderização. Em seguida,
+descrevemos como podemos usar o método de Monte Carlo para a aproximar a
+solução da Equação, usando a técnica de Amostragem de Importância. Descrevemos
+duas técnicas de amostragem e como combinar elas utillizando a técnica de
+Amostragem de Importância Múltipla. Por fim explicamos como podemos formular a
+Equação da Renderização em uma integral de caminhos, possibilitando a
+amostragem de caminhos inteiros.
+
+Baseando-nos em um Ray Tracer pronto, implementamos um Path Tracer que utiliza
+das técnicas descritas anteriormente, formulando o estimador de Monte Carlo e
+os pesos da Amostragem de Importância Múltipla. Finalmente, analisamos os
+resultados do Path Tracer, considerando as técnicas, as imagens de variância
+geradas, e cenas com diferentes iluminações.
+
+Os resultados obtidos mostraram a complementariedade das técnicas de amostragem
+apresentadas, com a Amostragem por BRDF mais eficiente em materiais reflexivos
+e fontes de luz grandes, enquanto a Amostragem de Fontes de Luz apresentou
+melhores resultados em materiais foscos e fontes de luz pequenas. Combinando as
+duas técnicas, obtivemos uma imagem com significativamente menos ruído que as
+outras técnicas separadamente, ilustrando as vantagens previstas pela teoria.
+
+Com base na implementação, existem diversas possibilidades de extensão deste
+trabalho. \citet{lindqvist21} mostra, entre outras, uma técnica de amostragem
+simples baseada apenas no hemisfério ponderado pelo cosseno do ângulo de
+incidência, sem considerar o material. Essa estratégia poderia, possivelmente,
+ajudar a diminuir a variância da esfera vermelha observada no
+\autoref{cap:resultados}.
+
+Dada a formulação com base na Amostragem de Importância Múltipla, também é
+possível implementar algoritmos mais complexos como o Path Tracing
+Bidirecional, \emph{Metropolis Light Transport} \citep{veach97}, \emph{Vertex
+Connection and Merging} \citep{georgiev12}, e mais recentemente, ReSTIR
+(\emph{Spatiotemporal Reservoir Importance Resampling}) \citep{bitterli20};
+todos esses que usam a Amostragem de Importância Múltipla.
+
+Além disso, ortogonalmente a esses algoritmos, é possível mover a implementação
+para a GPU, utilizando \emph{frameworks} de computação paralela, o que
+possibilita transformar a implementação em um \emph{Path Tracer} de tempo real.
+
+
