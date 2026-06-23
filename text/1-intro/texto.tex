@@ -1,67 +1,49 @@
 \chapter{Introdução}
 
-%=====================================================
+A área da Computação Gráfica tem como objetivo, em geral, a criação algorítmica
+de imagens.
 
-% A introdução geral do documento pode ser apresentada através das seguintes seções: Desafio, Motivação, Proposta, Contribuição e Organização do documento (especificando o que será tratado em cada um dos capítulos). O Capítulo 1 não contém subseções\footnote{Ver o Capítulo \ref{cap-exemplos} para comentários e exemplos de subseções.}.
+Nesse trabalho, nos preocupamos com o problema de síntese de imagens
+realísticas, em que, baseando-nos nas leis da física, tentamos criar uma imagem
+semelhante à que observamos em fotos e câmeras da vida real. Ao longo do tempo,
+desde sua criação, diversos algoritmos foram propostos, cada um com níveis de
+abstração diferentes.
 
-Este modelo foi proposto com o intuito de padronizar e simplificar as monografias, dissertações e teses produzidas no Departamento de Informática da UFPR. Ele foi vagamente inspirado nas normas da ABNT (conforme indicado em . Várias alterações foram feitas com o objetivo de melhorar sua estética e tornar o texto mais legível para trabalhos na área de informática. A versão atualizada deste modelo está disponível em.
+O \emph{Path Tracing} é uma das abordagens que realiza menos simplificações do
+transporte de luz, permitindo que diversos efeitos físicos como reflexões e
+iluminação indireta surjam naturalmente do algoritmo. Devido ao seu
+fotorrealismo, é o algoritmo padrão utilizado para filmes, animações,
+simulações e renderizações arquitetônicas. Entretanto, o preço a se pagar por
+essa generalidade é o fato de se tratar de um método extremamente custoso
+computacionalmente.
 
-Este modelo está baseado em uma classe especifica \verb#ppginf.cls#, que aceita várias opções de compilação. A versão do documento pode ser:
+Especificamente, \citet{kajiya86}, mostrou um modelo unificado - a equação da
+renderização - que modela o transporte de luz numa cena de forma fisicamente
+plausível. Algoritmos de Computação Gráfica estimam o valor dessa equação de
+modos diversos, simplificando e discretizando partes diferentes da equação. O
+\emph{Path Tracing}, por sua vez, produz, utilizando um integrador de Monte
+Carlo, estimativas cada vez mais precisas do valor exato da equação. Devido a
+essa forma de operação, o tempo gasto pelo algoritmo é aproximadamente
+proporcional ao número de estimativas feitas.
 
-\begin{itemize}
+Nesse trabalho, exploramos uma técnica, a Amostragem de Importância Múltipla
+\citep{veach95}, que permite a criação de estimativas mais próximas do
+resultado real, reduzindo a variância do estimador e, consequentemente,
+a quantidade de amostras necessárias para uma dada qualidade de imagem. Essa
+técnica é a base de algoritmos do estado da arte como ReSTIR
+\citep{bitterli20} e VCM \citep{georgiev12}.
 
-\item \verb#defesa#: é gerado um documento em espaço 1,5, frente simples e sem as páginas iniciais adicionais; é uma versão adequada para receber as anotações dos membros da banca de defesa.
+Para isso, implementamos um \emph{Path Tracer} e avaliamos o ganho de
+qualidade proporcionado pela técnica, comparando imagens renderizadas com igual
+número de amostras, com e sem a Amostragem de Importância Múltipla.
 
-\item \verb#final#: é gerado um documento em espaço simples, frente/verso, com páginas iniciais (capa, ficha catalográfica, folha de aprovação, agradecimentos, etc). É uma versão bem mais compacta, mais ecológica e ideal para a impressão definitiva.
+Este trabalho está organizado da seguinte forma: o \autoref{cap:fundamentacao}
+apresenta os fundamentos matemáticos e físicos necessários, incluindo a equação
+da renderização, sua formulação em termos de uma integral de caminhos, o
+estimador de Monte Carlo, técnicas de amostragem e a técnica de Amostragem de
+Importância Múltipla. O \autoref{cap:implem} descreve a implementação do
+\emph{Path Tracer} e a derivação dos pesos da Amostragem de Importância
+Múltipla para o caminho completo. Por fim, o \autoref{cap:resultados} apresenta
+e analisa os resultados obtidos.
 
-\end{itemize}
 
-Para obter os melhores resultados, compile este modelo usando a seguinte sequência de passos:
-
-\begin{quote}
-\begin{footnotesize}
-\begin{verbatim}
-pdflatex  main          // compilação inicial
-bibtex main             // processa referências bibliográficas
-pdflatex  main          // compilação final
-\end{verbatim}
-\end{footnotesize}
-\end{quote}
-
-ou
-
-\begin{quote}
-\begin{footnotesize}
-\begin{verbatim}
-make                    // faz tudo...
-\end{verbatim}
-\end{footnotesize}
-\end{quote}
-
-Os principais itens considerados na formatação deste documento foram:
-
-\begin{itemize}
-
-\item Papel em formato A4, com margens de 20 mm à direita e embaixo, 30 mm nos demais lados. Não devem ser usados cabeçalhos ou rodapés além dos que estão aqui propostos.
-
-\item O texto principal do documento escrito em 12 pontos. O fonte principal do texto pode ser selecionado no arquivo \verb#packages.tex#.
-
-\item Código-fonte, listagens e textos similares são formatados em fonte Courier 12 ou 10 pontos.
-
-\item O espaçamento padrão entre linhas é 1,5 linhas (1 linha na versão final). Não inserir espaços adicionais entre parágrafos normais. Figuras, tabelas, listagens e listas de itens devem ter um espaço adicional antes e após os mesmos.
-
-\item As páginas iniciais não são numeradas.
-
-\item O corpo do texto é numerado com algarismos arábicos (1, 2, 3, ...) a partir da introdução, ate o final do documento. Os números de página devem estar situados no alto à direita (páginas direitas) ou à esquerda (páginas esquerdas).
-
-\item Expressões em inglês, grego, latim ou outras línguas devem ser enfatizadas em itálico, como \emph{sui generis} ou \emph{scheduling} (use o comando \verb#\emph{...}#).
-
-\item Para reforçar algo, deve-se usar somente \textbf{negrito}. \underline{Sublinhado} ou MAIÚSCULAS não devem ser usados como forma de ênfase!
-
-\item As notas de rodapé também têm um modelo\footnote{As notas de rodapé dever ser escritas em tamanho 10 pt, numeradas em arábico.}. Notas de rodapé servem para fazer algum comentário paralelo; não as use para colocar URLs, referências bibliográficas ou significado de siglas.
-
-\end{itemize}
-
-Felizmente o \LaTeX\ resolve a maior parte dessas questões!
-
-%=====================================================

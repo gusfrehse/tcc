@@ -1,7 +1,22 @@
 \begin{abstract}
-
-The abstract should be the English translation of the ``resumo'', no more, no less.
-
-\lipsum[10-13]	% texto aleatório
+  Realistic image synthesis is a central problem in Computer Graphics, aiming
+  to algorithmically reproduce light transport in a physically plausible
+  manner. \emph{Path Tracing} is one of the approaches that makes the fewest
+  simplifications to this transport, allowing effects such as reflections and
+  indirect illumination to arise naturally from the algorithm. However, since
+  it estimates the rendering equation \citep{kajiya86} via a Monte Carlo
+  integrator, the method is computationally expensive, and its quality depends
+  directly on the number of samples used. In this work, we implement a
+  \emph{Path Tracer} and explore Multiple Importance Sampling \citep{veach95},
+  a technique that combines different sampling strategies to reduce estimator
+  variance. The implementation combines BRDF sampling and direct light source
+  sampling, and the derivation of the MIS weights is presented explicitly for
+  the full path. The effectiveness of the technique is evaluated by comparing
+  images rendered with an equal number of samples, with and without Multiple
+  Importance Sampling. The results demonstrate that the technique significantly
+  reduces estimator variance: variance maps rendered with an equal number of
+  samples show an expressive reduction, with the version without Multiple
+  Importance Sampling exhibiting visibly high variance in contrast to the
+  version that employs it.
 
 \end{abstract}

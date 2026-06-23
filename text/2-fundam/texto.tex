@@ -1,5 +1,5 @@
 \chapter{Fundamentacão Teórica}
-\label{cap:exemplos}
+\label{cap:fundamentacao}
 
 % figuras estão no subdiretório "figuras/" dentro deste capítulo
 \graphicspath{{\currfiledir/figuras/}}
@@ -280,31 +280,31 @@ amostragem e a distribuição $p$ correspondente. Como
 \]
 
 e precisamos que $p$ seja parecida com $f$, podemos fazer com que $p$ seja
-baseada no BSDF. Essa estratégia clássica é chamada de \emph{Amostragem por
-BSDF}. Vamos chamar a distribuição de probabilidade dela de  $p_b$.
+baseada no BRDF. Essa estratégia clássica é chamada de \emph{Amostragem por
+BRDF}. Vamos chamar a distribuição de probabilidade dela de  $p_b$.
 
 Ela, como qualquer estratégia de amostragem, funciona bem (possui pouca
 variância) quando os outros termos de $f$ são aproximadamente uniformes e a
 forma de $f$ se aproxima da de $p_b$. Isso acontece, principalmente, quando $L$
 por si só é aproximadamente uniforme.
 
-Alguns casos onde a amostragem por BSDF se destaca são
+Alguns casos onde a amostragem por BRDF se destaca são
 
 \begin{itemize}
   \item Cenas em céu aberto, onde o próprio céu é visto como uma
       fonte de luz. Isso acontece pois quase todas as direções possuem algum
       valor de radiância. Assim o termo com mais impacto na forma de $f$ é o
-      próprio BSDF.
+      próprio BRDF.
   \item Materiais reflexivos, como metais e espelhos. Nesse
-      caso, os BSDFs costumam apresentar picos bastante acentuados em torno
+      caso, os BRDF costumam apresentar picos bastante acentuados em torno
       da direção de reflexão especular. Assim, a forma de $f$ passa a ser
-      dominada pelo BSDF, tornando a amostragem por BSDF particularmente
+      dominada pelo BRDF, tornando a amostragem por BRDF particularmente
       eficiente.
 \end{itemize}
 
-Existem casos, porém, em que a amostragem por BSDF não é a ideal. Em uma cena
+Existem casos, porém, em que a amostragem por BRDF não é a ideal. Em uma cena
 com somente uma pequena fonte de luz, por exemplo, a chance de ``batermos'' na
-fonte de luz, amostrando de acordo com a distribuição do BSDF, é muito pequena.
+fonte de luz, amostrando de acordo com a distribuição do BRDF, é muito pequena.
 Uma cena noturna, portanto, com apenas a luz da lua e de alguns postes,
 precisaria de muitas amostras para convergir para o resultado real. Olhando na
 definição de $f$, a presença de poucas luzes na cena se traduz no fato de que
@@ -325,8 +325,8 @@ de transporte de partículas da Física \citep{coveyou67}.
 Exemplos de casos que melhor aproveitam a amostragem de fontes de luz são
 
 \begin{itemize}
-  \item Materiais com BSDF quase uniforme, ou seja, materiais foscos. Como o
-    BSDF é aproximadamente uniforme, o formato de $f$ é dado por $L$.
+  \item Materiais com BRDF quase uniforme, ou seja, materiais foscos. Como o
+    BRDF é aproximadamente uniforme, o formato de $f$ é dado por $L$.
   \item Casos em que existem fontes de luz pequenas e com alta intensidade,
     como por exemplo uma cena noturna.
 \end{itemize}
@@ -342,11 +342,11 @@ recentemente \citep{lin22, yan25}.
 \label{sec:mis}
 
 Na seção anterior, apresentamos duas maneiras de obter amostras para nosso
-estimador de Monte Carlo, uma por meio da Amostragem por BSDF e outro por meio
+estimador de Monte Carlo, uma por meio da Amostragem por BRDF e outro por meio
 da Amostragem de Fontes de Luz. Cada uma dessas estratégias funciona melhor em
 certos casos, e é interessante notar que esses casos são, em grande parte,
 complementares: quando a estratégia de amostragem de fontes de luz é melhor, a
-estratégia por BSDF é pior, e vice-versa.
+estratégia por BRDF é pior, e vice-versa.
 
 Nosso estimador Monte Carlo espera apenas uma técnica de amostragem com uma
 distribuição de probabilidade correspondente, então precisamos de um jeito de
@@ -396,7 +396,7 @@ contribuição quando $p_i$ for alto relativamente aos outros $p$.
 
 Uma restrição, porém, é que todas as distribuições devem estar usando a mesma
 medida de probabilidade. No escopo desse trabalho vamos converter a medida de
-direções, usada na Amostragem por BSDF, para a medida de área, usada na
+direções, usada na Amostragem por BRDF, para a medida de área, usada na
 Amostragem de Fontes de Luz. Essa conversão é dada pelo jacobiano da
 transformação \citep[Cap 8.2.2.2]{veach97}:
 

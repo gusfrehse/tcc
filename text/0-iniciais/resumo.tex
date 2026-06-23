@@ -1,7 +1,23 @@
 \begin{resumo}
-
-O resumo deve conter no máximo 500 palavras, devendo ser justificado na largura da página e escrito em um único parágrafo\footnote{E também não deve ter notas de rodapé; em outras palavras, não siga este exemplo... ;-)} com um afastamento de 1,27 cm na primeira linha. O espaçamento entre linhas deve ser de 1,5 linhas. O resumo deve ser informativo, ou seja, é a condensação do conteúdo e expõe finalidades, metodologia, resultados e conclusões.
-
-\lipsum[10-13]	% texto aleatório
+  A síntese de imagens realísticas é um problema central da Computação Gráfica,
+  em que se busca reproduzir algoritmicamente o transporte de luz de forma
+  fisicamente plausível. O \emph{Path Tracing} é uma das abordagens que realiza
+  menos simplificações desse transporte, permitindo que efeitos como reflexões
+  e iluminação indireta surjam naturalmente do algoritmo. Por estimar a equação
+  da renderização \citep{kajiya86} por meio de um integrador de Monte Carlo, no
+  entanto, o método é extremamente custoso computacionalmente, e sua qualidade
+  depende diretamente do número de amostras utilizadas. Neste trabalho,
+  implementamos um \emph{Path Tracer} e exploramos a Amostragem de Importância
+  Múltipla \citep{veach95}, uma técnica que combina diferentes estratégias de
+  amostragem de forma a reduzir a variância do estimador. A implementação
+  combina amostragem da BRDF e amostragem direta de fontes de luz, e a
+  derivação dos pesos é apresentada de forma explícita para o caminho completo.
+  A efetividade da técnica é avaliada por meio da comparação de imagens
+  renderizadas com igual número de amostras, com e sem a Amostragem de
+  Importância Múltipla. Os resultados demonstram que a técnica reduz
+  significativamente a variância do estimador: imagens de variância
+  renderizadas com igual número de amostras mostram uma redução expressiva, com
+  a versão sem Amostragem de Importância Múltipla apresentando variância
+  visivelmente elevada em contraste com a versão que a utiliza.
 
 \end{resumo}
