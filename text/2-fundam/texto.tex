@@ -2,7 +2,7 @@
 \label{cap:exemplos}
 
 % figuras estão no subdiretório "figuras/" dentro deste capítulo
-\graphicspath{\currfiledir/figuras/}
+\graphicspath{{\currfiledir/figuras/}}
 
 %=====================================================
 \section{Síntese de imagens realistas}
@@ -78,60 +78,66 @@ origem de mais infinitos raios incidentes, e assim em diante.
 
 \section{Equação da Renderização}
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\linewidth]{wiwo.pdf}
+    \caption{Ilustração dos elementos da equação da renderização}
+    \label{fig:wiwo}
+\end{figure}
+
 Na década de 80, \cite{kajiya86}, baseando-se em modelos de transporte de
 partículas já existentes utilizados em cálculos físicos, explicitou esse
 problema em uma equação integral recursiva. Usaremos essa equação, chamada de
 \emph{Equação da Renderização}, diversas vezes, porém com a notação mais
 comumente utilizada de \citet{veach97}:
 
+\[
+  L_o(x, \omega_o) = L_e(x, w_o) + \int_{\omega_i \in \mathcal{H}} L_i(x, w_i)
+  f_s(x, \omega_i \rightarrow \omega_o) | \cos\theta |
+  d\sigma_x(\omega_i)
+  \label{eq:render}
+\]
+
+A medida física de $L_o$ é chamada de \emph{radiância}, e pode ser pensada como
+a intensidade da luz vinda de certa direção, apesar de sua definição formal ter
+mais nuances. Ver \cite[Cap. 5]{pbrt4}. Aqui $L_o(x, \omega_o)$ representa a
+radiância \emph{saindo} de $x$ na direção $\omega_o$, enquanto $L_i(x,
+\omega_i)$ representa a radiância \emph{chegando} da direção $\omega_i$ no
+ponto $x$. Essas duas quantidades são relacionadas pela fórmula
+
+\[
+  L_i(x, \omega) = L_o(\gamma(x, \omega), -\omega)
+\]
+
+onde $\gamma(x, \omega_i)$ é a função de \emph{Ray Casting}, que retorna o
+primeiro ponto da geometria na direção $\omega_i$ a partir do ponto $x$. Logo,
+podemos substituir e temos a equação da renderização no formato que iremos
+utilizar nesse trabalho. Também definimos $L_o$ como $L$. Assim,
+
 \begin{equation}
-  L(x' \rightarrow x'') = L_e(x' \rightarrow x'') + \int_{x \in \mathcal{M}}
-  L(x \rightarrow x') f_s(x \rightarrow x' \rightarrow x'') G(x \leftrightarrow
-  x') dA(x) \label{eq:render}
+  L(x, \omega_o) = L_e(x, w_o) + \int_{\omega_i \in \mathcal{H}} L(\gamma(x, \omega_i),
+  -\omega_i) f_s(x, \omega_i \rightarrow \omega_o) | \cos\theta |
+  d\sigma_x(\omega_i)
+  \label{eq:render}
 \end{equation}
 
-[TODO: imagem com x x' x'' e um raio]
-
-A medida física de $L$ é chamada de \emph{radiância}, e pode ser pensada como a
-intensidade da luz vinda de certa direção, apesar de sua definição formal ter
-mais nuances. Ver \cite[Cap. 5]{pbrt4}.
-
-A Equação da Renderização segue o raciocínio da seção passada: a radiância no
-ponto $x''$ vinda do ponto $x'$ é igual à soma das das radiâncias vindas de
-outros pontos na geometria da cena na direção de $x'$, $L(x \rightarrow x')$,
-ponderadas por um peso, $f_s(x \rightarrow x' \rightarrow x'')$, e um termo de
-geometria $G(x \leftrightarrow x')$. Por último temos a medida de área $dA(x)$
-que indica a integração em cada área infinitesimal ao redor do ponto $x$. 
+A Equação da Renderização segue o raciocínio da seção passada: a radiância
+vinda do ponto $x$ na direção $\omega_o$ é igual à soma das das radiâncias
+vindas de outros direções no hemisfério $\mathcal{H}$ de $x$, $L_i(x,
+\omega_i)$, ponderadas por um peso, $f_s(x, \omega_i \rightarrow \omega_o)$, e
+um termo de geometria $| \cos \theta |$. Por último temos a medida de ângulo
+sólido $d\sigma_x(\omega_i)$ que indica a integração em uma seção infinitesimal
+do hemisfério redor do ponto $x$. 
 
 O peso $f_s$ é chamado de BRDF, \emph{bidirectional reflectance distribution
 function} e diz, dada uma direção de incidência e uma direção de reflexão, qual
-a porcentagem de raios de luz que é refletida no ponto $x'$. Ou, especificamente,
-qual a razão da radiância vinda do ponto $x$, refletida no ponto $x'$ e que
-chega no ponto $x''$.
+a porcentagem de raios de luz que é refletida no ponto $x$. Ou,
+especificamente, qual a razão da radiância vinda da direção $\omega_i$,
+refletida no ponto $x$ e que sai na direção $\omega_o$.
 
-O termo de geometria $G(x \leftrightarrow x')$ engloba duas partes. Primeiro
-ele é encarregado de checar se o ``caminho está livre'' entre os pontos $x$ e
-$x'$. Se existe alguma parte da geometria da cena que, olhando do ponto $x$,
-oclude o ponto $x'$, então $V(x \leftrightarrow x') = 0$ e assim
-desconsideramos a possível contribuição de radiância vinda de $x$. Caso
-contrário, $V(x \leftrightarrow x') = 1$. A segunda parte serve para incorporar
-o efeito da lei de Lambert, que diz que a intensidade da luz observada é
-diretamente proporcional ao cosseno do ângulo de incidência do raio de luz.
-Como temos duas incidências, o termo fica com dois cossenos. Além disso,
-formalmente, a radiância é definida por estereoradianos, e, como essa
-quantidade diminui conforme o quadrado a distância entre os pontos
-($\left|\left|x - x'\right|\right|^2$) aumenta, temos que ajustar de acordo.
-Assim, $G$ é definido
-como
-
-\[
-  G(x \leftrightarrow x') = V(x \leftrightarrow x')
-  \frac{\cos{\theta_i}\cos{\theta_o}}{\left|\left|x - x'\right|\right|^2}
-\]
-
-Com $V$ sendo a função de visibilidade: $V(x \leftrightarrow x') = 1$ se existe
-uma reta sem obstruções entre $x$ e $x'$ e $V(x \leftrightarrow x') = 0$ no
-caso contrário.
+O termo de geometria $| \cos \theta |$, serve para incorporar o efeito da
+lei de Lambert, que diz que quanto maior o ângulo de incidência em relação à
+normal da superfície, menor a intensidade efetiva da radiância incidente.
 
 Para mais informações sobre as quantidades radiométricas, recomendamos a
 leitura de \citet[Cap. 5]{pbrt4} e \citet[Cap.3]{veach97}. Porém, acreditamos
@@ -199,8 +205,8 @@ $Y$. Assim
 \[ S = \left\langle \frac{f(X)}{p(X)} \right\rangle \approx \frac{1}{N}
 \sum_{i=1}^N \frac{f(X_i)}{p(X_i)} = S_N \]
 
-onde $S_N$ é o nosso estimador de Monte Carlo. Para generalizar para a versão
-contínua, queremos calcular a integral
+onde $S_N$ é o nosso estimador de Monte Carlo. Agora, para generalizar para a
+versão contínua, queremos calcular a integral
 
 \[ I = \int_{x \in D} f(x) dx = \int_{x \in D} \frac{f(x)}{p(x)} p(x) dx =
 \left\langle \frac{f(X)}{p(X)} \right\rangle \]
@@ -252,9 +258,9 @@ Voltando à Equação da Renderização \ref{eq:render}, podemos escrever a inte
 do lado direito da seguinte forma
 
 \begin{align*}
-  I &=  \int_{x \in \mathcal{M}} L(x \rightarrow x') f_s(x
-  \rightarrow x' \rightarrow x'') G(x \leftrightarrow x') dA(x)\\
-  &= \int_{x \in \mathcal{M}} f(x) dA(x)\\
+  I &=  \int_{\omega_i \in \mathcal{H}} L(\gamma(x, \omega_i), -\omega_i) f_s(x,
+  \omega_i \rightarrow \omega_o) | \cos \theta | d\sigma_x(\omega_i)\\
+  &= \int_{omega_i \in \mathcal{H}} f(x, \omega_i, \omega_o) d\sigma_x(\omega_i)\\
 \end{align*}
 
 e assim podemos fazer um estimador Monte Carlo
@@ -269,8 +275,8 @@ Ao usar o estimador da última seção, porém, precisamos escolher uma técnica
 amostragem e a distribuição $p$ correspondente. Como
 
 \[
-  f(x) = L(x \rightarrow x') f_s(x \rightarrow x' \rightarrow x'') G(x
-  \leftrightarrow x')
+  f(x, \omega_i, \omega_o) = L(\gamma(x, \omega_i), -\omega_i) f_s(x, \omega_i
+  \rightarrow \omega_o) | \cos \theta |
 \]
 
 e precisamos que $p$ seja parecida com $f$, podemos fazer com que $p$ seja
@@ -319,14 +325,11 @@ de transporte de partículas da Física \citep{coveyou67}.
 Exemplos de casos que melhor aproveitam a amostragem de fontes de luz são
 
 \begin{itemize}
-  \item Materiais com BSDF quase uniforme, ou seja, materiais
-    foscos. Como o BSDF é aproximadamente uniforme, o formato de $f$ é dado por
-  $L$.
-\item Casos em que o termo de geometria seja simples, ou seja, que não
-    haja muitos objetos obstruindo as fontes de luz.\footnote{No caso da
-    amostragem por BSDF, por outro lado, como seguimos na direção amostrada até
-chegar no próximo ponto, nunca teremos uma obstrução, então o termo de
-geometria é capturado perfeitamente.} \end{itemize}
+  \item Materiais com BSDF quase uniforme, ou seja, materiais foscos. Como o
+    BSDF é aproximadamente uniforme, o formato de $f$ é dado por $L$.
+  \item Casos em que existem fontes de luz pequenas e com alta intensidade,
+    como por exemplo uma cena noturna.
+\end{itemize}
 
 Nesse trabalho, iremos utilizar essas duas estratégias de amostragem. Fazemos
 essa escolha devido à relativa simplicidade de implementação e ao fato de que,
@@ -334,8 +337,6 @@ quando combinadas (ver próximas sessões), essas estratégias produzem resultad
 satisfatórios em uma ampla variedade de cenas. Porém, existem outros métodos
 usados para amostragem, inclusive trata-se de uma das áreas com mais pesquisas
 recentemente \citep{lin22, yan25}. 
-
-[TODO: imagem com bsdf * le para cenas com poucas luzes pequenas e com luzes grandes]
 
 \section{Amostragem De Importância Múltipla}
 \label{sec:mis}
@@ -400,7 +401,7 @@ Amostragem de Fontes de Luz. Essa conversão é dada pelo jacobiano da
 transformação \citep[Cap 8.2.2.2]{veach97}:
 
 \[
-  p_A(x) = p_\omega(\omega) \left( \frac{|\cos(\theta_i)|}{||x - x'||^2}  \right)
+  p(\omega) = p_A(x) \frac{||x - x'||^2}{|\cos \theta|} 
 \]
 
 onde $p_A$ é a distribuição de probabilidade em relação à medida de área e
@@ -432,10 +433,24 @@ em desenrolar a recursão da integral da equação \ref{eq:render}, dado um
 caminho $\bar{x} = (x_1, \ldots, x_k)$, de tamanho $k$, temos
 
 \begin{equation}
-  I =  \sum_{k=0}^\infty \int_{\bar{x} \in \mathcal{M}^k}
-  \left(\prod_{i=1}^{k-2} f(x_{i+2} \rightarrow x_{i+1} \rightarrow x_i)
-  G(x_{i+2} \leftrightarrow x_{i+1})\right) dA(x_1) \ldots dA(x_k).
+  I =  \sum_{k=0}^\infty \int_{\bar{x} \in \mathcal{P}_k} L_e(x_k,
+  \omega_{o,k}) \left(\prod_{m=2}^{k-1} f(x_m, \omega_{i,m} \rightarrow
+  \omega_{o,m})|\cos\theta_m|\right)
+  d\sigma_{x_1}(\omega_{i,1}) \ldots d\sigma_{x_k}(\omega_{i,k})
 \end{equation}
+
+Onde $\omega_{i,m} = \frac{(x_{m-1} - x_{m})}{|(x_{m-1} - x_{m})|}$,
+$\omega_{o,m} = \frac{(x_{m+1} - x_{m})}{|(x_{m+1} - x_{m})|}$ e
+$\mathcal{P}_k$ é o espaço de caminhos de tamanho $k$.\footnote{O espaço de
+caminhos aqui é conjunto de sequências de direções $(\omega_1, \ldots,
+\omega_k)$, junto com uma posição inicial $x_0$. Podemos descobrir os
+\emph{pontos de um caminho} usando a função de \emph{Ray Casting}: $x_i =
+\gamma(x_{i-1}, \omega_i)$. Assim, podemos representar um caminho apenas com
+seus pontos $\bar{x} = (x_1, \ldots, x_k)$. Neste trabalho, usaremos
+majoritariamente a notação de pontos para se referir à um caminho.
+Diferentemente, Veach usa diretamente os pontos de um caminho como o caminho em
+sí, porém isso introduz diversos termos extras de visibilidade e de correção de
+medidas, que não precisamos nos preocupar neste trabalho.}
 
 Note, agora, que o domínio de integração, que antes eram pontos independentes
 da geometria, virou caminhos completos das fontes de luz até os sensores. Com
@@ -446,12 +461,12 @@ disso, precisamos de uma distribuição de probabilidade para essa amostra de
 caminho. Ela é dada por
 
 \[
-  p(\bar{x}) = p_{A,1}(x_1) \ldots p_{A,k}(x_k)
+  p(\bar{x}) = p_1(x_1) \ldots p_k(x_k)
 \]
 
-onde $p_{A,i}$ representa a distribuição de probabilidade na medida de área da
-técnica de amostragem utilizada para obter o $i$-ésimo vértice do caminho
-$\bar{x}$.
+onde $p_i$ representa a distribuição de probabilidade na medida de ângulo
+sólido da técnica de amostragem utilizada para obter o $i$-ésimo vértice do
+caminho $\bar{x}$.
 
 \section{Conclusão}
 
