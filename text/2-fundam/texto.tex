@@ -32,7 +32,15 @@ uma direção.\footnote{Nos olhos humanos e em câmeras com lentes, raios de luz
 de múltiplas direções podem atingir a mesma célula sensorial/sensor. Isso causa
 diversos efeitos, como por exemplo de profundidade de campo.}
 
-[TODO: imagem pinhole]
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\linewidth]{pinhole.pdf}
+    \caption{Ilustração de uma câmera \emph{pinhole}. Note que cada ponto da
+    imagem formada está associada à apenas uma direção, a direção do ponto na
+    imagem até o furo na caixa.}
+    \label{fig:pinhole}
+\end{figure}
+
 
 Com base nesse fato, podemos imaginar uma forma de descobrir a cor de cada
 pixel. Como a luz atravessa o espaço em linha reta,\footnote{Pelo menos para o
