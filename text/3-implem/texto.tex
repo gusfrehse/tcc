@@ -4,31 +4,31 @@
 % figuras estão no subdiretório "figuras/" dentro deste capítulo
 \graphicspath{\currfiledir/figuras/}
 
-A implementação do Path Tracer foi feita a partir de um Ray Tracer básico,
-implementado seguindo o texto de \citet{shirley25}. A partir dele foram feitas
-modificações principalmente para incorporar as diferentes técnicas de
-amostragem e a combinação delas por meio do amostragem de importância múltipla.
-Além disso foram implementadas algumas imagens para visualizar a contribuição
-de cada método e a vâriancia em cada pixel, além de outros materiais e suas
+A implementação do \emph{Path Tracer} foi feita a partir de um \emph{Ray Tracer}
+básico, implementado seguindo o texto de \citet{shirley25}. A partir dele, foram
+feitas modificações principalmente para incorporar as diferentes técnicas de
+amostragem e a combinação delas por meio da amostragem de importância múltipla.
+Além disso, foram implementadas algumas imagens para visualizar a contribuição
+de cada método e a variância em cada pixel, além de outros materiais e suas
 correspondentes distribuições de probabilidade.
 
 A saída do programa são três imagens:
 
 \begin{description}
-  \item[output.png] A imagem gerada pelo algoritmo de Path Tracing.
+  \item[output.png] A imagem gerada pelo algoritmo de \emph{Path Tracing}.
   \item[variance.png] Uma imagem gerada com valores de variância de cada pixel,
     permitindo achar locais onde podemos melhorar nosso algoritmo.
-  \item[mis\_viz] Uma imagem de visualização das técnicas de amostragem, onde
-    cada pixel é colorido conforme a técniaca usada.
+  \item[mis\_viz.png] Uma imagem de visualização das técnicas de amostragem,
+  onde cada pixel é colorido conforme a técnica utilizada.
 \end{description}
 
-O código foi produzido na linguagem \emph{Rust}, usando o compilador \texttt{rustc},
+O código foi produzido na linguagem \emph{Rust}, utilizando o compilador \texttt{rustc},
 versão \texttt{1.96.0}.
 
 \section{Arquitetura}
 
 Seguindo \citet{shirley25} temos alguns módulos, cada qual em um arquivo. Eles
-são
+são:
 
 \begin{description}
   \item[main.rs] Ponto de entrada do programa, é onde está o
@@ -37,34 +37,34 @@ principal que irá estimar a equação da renderização.
   \item[utils.rs] Módulo de utilidades, possui funções para obter números
     aleatórios e algumas funções de operações comuns em vetores.
   \item[vec3.rs] Possui a definição da estrutura de dados \texttt{Vec3} e
-    seus métodos, que serão usados amplamente no programa.
+    seus métodos, que serão utilizados amplamente no programa.
   \item[hittable.rs] Define a interface \texttt{Hittable}, que abstrai um
-    elemento da cena que pode ser atingido por um raio de luz. Além disso
+    elemento da cena que pode ser atingido por um raio de luz. Além disso,
     também define o \texttt{HittableList}, uma coleção de elementos
     \texttt{Hittable}.
   \item[sphere.rs] Define a estrutura de dados \texttt{Sphere}, que representa
-    uma esfera na cena. Além disso implementa a interface \texttt{Hittable}
+    uma esfera na cena. Além disso, implementa a interface \texttt{Hittable}
     para ela, permitindo que ela apareça na cena.
   \item[ray.rs] Define a estrutura de dados \texttt{Ray}, que representa um
     raio com um ponto de início e uma direção.
-  \item[material.rs] Possui a implementação dos BRDFs utilizados, uma função
-    para amostragem baseada em cada BRDF e também a distribuição de
-    probabilidade correspondente a cada essa amostragem. Também usamos essa
-    interface para fontes de luz, e definimos uma fonte de luz difusa.
+  \item[material.rs] Possui a implementação dos BRDFs utilizados e as funções
+  para amostragem e distribuições de probabilidade de cada BRDF. Também
+  utilizamos essa interface para fontes de luz e definimos uma fonte de luz
+  difusa.
   \item[light\_sampler.rs] Possui a definição da estrutura de dados do
     \texttt{LightSampler}, que permitirá amostrar pontos em uma fonte de luz. 
-  \item[camera.rs] Define a estrutura \texttt{Camera}, e implementa a função
-    que gerará os raios iniciais para cada pixel, baseados nos parâmetros da
-    estrutura.
+  \item[camera.rs] Define a estrutura \texttt{Camera} e implementa a função que
+  gerará os raios iniciais para cada pixel, baseados nos parâmetros da
+  estrutura.
 \end{description}
 
 
 \section{Laço principal}
 
 No arquivo \texttt{main.rs} temos o laço principal do programa, descrito no
-Algoritmo \autoref{alg:mainloop}. Nele, iteramos por todos os pixels, para cada um
-obtemos um raio inicial com base na câmera, computamos o integrando $N$
-vezes usando a função \texttt{L()}, e, finalmente, normalizamos e computamos
+Algoritmo~\ref{alg:mainloop}. Nele, iteramos por todos os pixels, para cada
+um obtemos um raio inicial com base na câmera, computamos o integrando $N$ vezes
+utilizando a função \texttt{L}, e, finalmente, normalizamos e computamos
 valores como a média, a variância e a cor da imagem de visualização.
 
 \begin{algorithm}
@@ -82,7 +82,7 @@ valores como a média, a variância e a cor da imagem de visualização.
     \For{$k = 1$ até $N$}
         \State \text{raio} $\gets \Call{NovoRaio}{camera, i, j}$
 
-        \State $(\text{radiância}, \text{mis}) \gets \Call{L}{\text{raio}, \text{world}, \text{lights}}$
+        \State $(\text{radiância}, \text{mis}) \gets \Call{L}{\text{raio}, \text{mundo}, \text{luz}}$
 
         \State $\text{delta} \gets \text{radiância} - \text{média}$
         \State \text{média} $\gets \text{média} + \text{delta} / k$
@@ -104,13 +104,13 @@ valores como a média, a variância e a cor da imagem de visualização.
 
 Aqui $média$ é a estimativa de Monte Carlo para a radiância; $variância$ é a
 variância empírica de cada pixel, obtida pelo algoritmo de
-Welford\footnote{Usamos esse algoritmo para evitar problemas de instabilidade
-numérica, já que, calculando usando a fórmula clássica, $\left\langle (X -
-\langle X \rangle)^2 \right\rangle$, acabamos fazendo a subtração de dois
-números potencialmente muito próximos, o que aumenta significantemente a
-magnitude de erros numéricos.} \citep{welford62}; e $mis\_viz$ se refere à um
-valor que codifica de qual estratégia de amostragem obtivemos a contribuição
-naquele pixel. 
+Welford\footnote{Utilizamos esse algoritmo para evitar problemas de
+instabilidade numérica, já que, calculando utilizando a fórmula clássica,
+$\left\langle (X - \langle X \rangle)^2 \right\rangle$, acabamos fazendo a
+subtração de dois números potencialmente muito próximos, aumentando
+significantemente a magnitude de erros numéricos.} \citep{welford62}; e
+$mis\_viz$ se refere à um valor que codifica de qual estratégia de amostragem
+obtivemos a contribuição naquele pixel. 
 
 É importante ressaltar que, na implementação, as grandezas radiométricas são
 representadas por vetores RGB (\texttt{Vec3}). Dessa forma, os cálculos
@@ -121,16 +121,16 @@ canal para a cor final do pixel.
 
 \section{A função $L$}
 
-A função $L$, para estimar valor da radiância na direção dada, fará a soma
+A função $L$, para estimar o valor da radiância na direção dada, fará a soma
 ponderada das contribuições dos diversos caminhos amostrados, utilizando a
 amostragem de importância múltipla da seção \ref{sec:mis}.
 
 \subsection{Formulação do estimador de importância múltipla}
 
-A ideia é criarmos um caminho base, amostrando cada ponto usando a amostragem
-por BRDF. Porém, a cada ponto amostrado, também amostramos as fontes de luz,
-criando novos caminhos completos a partir da mesma base. Assim para o caminho
-base $(x_1, \ldots, x_{k - 1})$ iremos efetivamente amostrar os caminhos
+A ideia é criarmos um caminho base, amostrando cada ponto utilizando a
+amostragem por BRDF. Porém, a cada ponto amostrado, também amostramos as fontes
+de luz, criando novos caminhos completos a partir da mesma base. Assim, para o
+caminho base $(x_1, \ldots, x_{k - 1})$, iremos efetivamente amostrar os caminhos
 
 \begin{gather*}
   (x_1, x_{L,2}), \\
@@ -142,10 +142,10 @@ base $(x_1, \ldots, x_{k - 1})$ iremos efetivamente amostrar os caminhos
 
 onde $x_i$ são os pontos do caminho base e $x_{L,i}$ são os pontos amostrados
 de fontes de luz em cada passo. Além desses caminhos, temos que contar também
-os casos que, ao amostar por BRDF, amostramos um ponto em uma fonte de luz.
+os casos que, ao amostrar por BRDF, obtemos um ponto em uma fonte de luz.
 Nesse caso, o caminho base termina precocemente.
 
-Assim, temos duas possíveis maneiras de amostrar cada caminho - uma é com o
+Assim, temos duas possíveis maneiras de amostrar cada caminho --- uma é com o
 último vértice do caminho sendo obtido pela amostragem de fontes de luz; a
 outra é com ele sendo amostrado pelo BRDF. Por esse motivo, teremos que
 utilizar a amostragem de importância múltipla para combinar as técnicas.
@@ -153,7 +153,8 @@ utilizar a amostragem de importância múltipla para combinar as técnicas.
 Observe, também, que podemos escrever cada técnica de amostragem de
 \emph{caminhos} em uma tupla $(k, T)$, com $k \in \mathbb{N}$ e $T \in  \{L,
 B\}$, $k$ representando o tamanho do caminho completo e $T$ representando a
-técnica de amostragem usada para obter o último vértice do caminho amostrado.
+técnica de amostragem utilizada para obter o último vértice do caminho
+amostrado.
 
 Relembrando a equação \ref{eq:misestimator}, temos
 
@@ -200,15 +201,15 @@ ocasiões:
 
 \begin{itemize}
   \item O raio não intersecta nenhuma geometria (ele ``foge da cena'').
-  \item O raio atinge um material emissivo. Nesse caso adicionamos a
+  \item O raio atinge um material emissivo. Nesse caso, adicionamos a
     contribuição, ponderada corretamente com $w_{\text{k},B}$.
   \item O algoritmo de Roleta Russa decide encerrar o caminho atual.
 \end{itemize}
 
-Caso nenhum desses casos não aconteçam, amostramos um ponto nas fontes de luz e
+Caso nenhum desses casos aconteça, amostramos um ponto nas fontes de luz e
 adicionamos sua contribuição com $w_{\text{k}, L}$. Em seguida, amostramos o
 BRDF do material atual para obter o próximo ponto do caminho base, atualizamos
-as variáveis, e reiniciamos o laço.
+as variáveis e reiniciamos o laço.
 
 A variável \texttt{peso} guardará, na $n$-ésima iteração, o valor correspondente a 
 
@@ -303,17 +304,17 @@ No caso de emitir, existem três possibilidades:
 \section{\texttt{AmostrarLuz}}
 
 Nessa parte, já sabemos que o material atual não é emissivo, então podemos
-amostrar uma fonte de luz para obter um possível caminho completo. Para isso
-usamos a estrutura \texttt{LightSampler}, que retorna um ponto na fonte de luz
-e a probabilidae $p_L$, na medida de área, de amostra-lo.
+amostrar uma fonte de luz para obter um possível caminho completo. Para isso,
+utilizamos a estrutura \texttt{LightSampler}, que retorna um ponto na fonte de
+luz e a probabilidade $p_L$ de amostragem na medida de área.
 
 Em seguida, verificamos se há alguma obstrução entre o ponto na fonte de luz
 amostrado e o ponto atual (que foi amostrado pelo BRDF na iteração anterior).
 Se existir uma obstrução, continuamos para o resto do \emph{loop}, sem
 adicionar nenhuma contribuição. Caso contrário, verificamos o BRDF para obter
 seu valor e o $p_B$ do ponto atual. Além disso, convertemos o $p_L$, que está
-em medida de área, para a medida de ângulo sólido. Com isso conseguimos
-calcular o peso $w_{k, L}$ e portanto a contribuição para esse caminho.
+em medida de área, para a medida de ângulo sólido. Com isso, conseguimos
+calcular o peso $w_{k, L}$ e, portanto, a contribuição para esse caminho.
 
 \begin{algorithm}
 \caption{Função AmostrarLuz}
@@ -335,7 +336,7 @@ calcular o peso $w_{k, L}$ e portanto a contribuição para esse caminho.
 
 \section{\texttt{RoletaRussa}}
 
-Para evitar caminhos muitos grandes, visto que quanto maior o caminho menor a
+Para evitar caminhos muito grandes, visto que quanto maior for o caminho, menor a
 contribuição na imagem final, utilizamos o método de Roleta Russa
 \citep{arvo90} para terminar o caminho sem enviesar o estimador.
 
@@ -355,8 +356,8 @@ contribuição na imagem final, utilizamos o método de Roleta Russa
 
 \section{Conclusão}
 
-Neste capítulo apresentamos a implementação do integrador de Path Tracing
-desenvolvido nesse trabalho. A partir de um Ray Tracer básico foram
+Neste capítulo, apresentamos a implementação do integrador de \emph{Path Tracing}
+desenvolvido nesse trabalho. A partir de um \emph{Ray Tracer} básico, foram
 incorporadas técnicas de redução de variância, como a amostragem de fontes de
 luz (NEE), amostragem por BRDF, sua combinação utilizando amostragem de
 importância múltipla e a técnica de Roleta Russa. 

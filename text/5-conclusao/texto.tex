@@ -5,22 +5,22 @@
 \graphicspath{\currfiledir/figuras/}
 
 
-Neste trabalho explicamos a intuição por trás da síntese de imagens realista e
-como podemos capturar essa intuição com a Equação da Renderização. Em seguida,
-descrevemos como podemos usar o método de Monte Carlo para a aproximar a
-solução da Equação, usando a técnica de Amostragem de Importância. Descrevemos
-duas técnicas de amostragem e como combinar elas utillizando a técnica de
-Amostragem de Importância Múltipla. Por fim explicamos como podemos formular a
-Equação da Renderização em uma integral de caminhos, possibilitando a
-amostragem de caminhos inteiros.
+Neste trabalho, explicamos a intuição por trás da síntese de imagens realísticas
+e como podemos capturar essa intuição com a Equação da Renderização. Em seguida,
+descrevemos como podemos utilizar o método de Monte Carlo para aproximar a
+solução da Equação da Renderização, utilizando a técnica de Amostragem de
+Importância. Descrevemos duas técnicas de amostragem e como combinar elas
+utillizando a técnica de Amostragem de Importância Múltipla. Por fim, explicamos
+como podemos formular a Equação da Renderização em uma integral de caminhos,
+possibilitando a amostragem de caminhos inteiros.
 
 Baseando-nos em um Ray Tracer pronto, implementamos um Path Tracer que utiliza
-das técnicas descritas anteriormente, formulando o estimador de Monte Carlo e
+as técnicas descritas anteriormente, formulando o estimador de Monte Carlo e
 os pesos da Amostragem de Importância Múltipla. Finalmente, analisamos os
 resultados do Path Tracer, considerando as técnicas, as imagens de variância
-geradas, e cenas com diferentes iluminações.
+geradas e cenas com diferentes iluminações.
 
-Os resultados obtidos mostraram a complementariedade das técnicas de amostragem
+Os resultados obtidos mostraram a complementaridade das técnicas de amostragem
 apresentadas, com a Amostragem por BRDF mais eficiente em materiais reflexivos
 e fontes de luz grandes, enquanto a Amostragem de Fontes de Luz apresentou
 melhores resultados em materiais foscos e fontes de luz pequenas. Combinando as
@@ -35,11 +35,11 @@ ajudar a diminuir a variância da esfera vermelha observada no
 \autoref{cap:resultados}.
 
 Dada a formulação com base na Amostragem de Importância Múltipla, também é
-possível implementar algoritmos mais complexos como o Path Tracing
-Bidirecional, \emph{Metropolis Light Transport} \citep{veach97}, \emph{Vertex
-Connection and Merging} \citep{georgiev12}, e mais recentemente, ReSTIR
+possível implementar algoritmos mais complexos como o \emph{Bidirectional Path
+Tracing}, \emph{Metropolis Light Transport} \citep{veach97}, \emph{Vertex
+Connection and Merging} \citep{georgiev12}, e mais recente, ReSTIR
 (\emph{Spatiotemporal Reservoir Importance Resampling}) \citep{bitterli20};
-todos esses que usam a Amostragem de Importância Múltipla.
+todos esses que utilizam a Amostragem de Importância Múltipla.
 
 Além disso, ortogonalmente a esses algoritmos, é possível mover a implementação
 para a GPU, utilizando \emph{frameworks} de computação paralela, o que

@@ -81,17 +81,17 @@ função $L$ por pixel.
   \label{fig:contrib-separadas}
 \end{figure}
 
-A \autoref{fig:contrib-separadas} compara as duas técnicas de amostragem, junto
+A \autoref{fig:contrib-separadas} compara ambas as técnicas de amostragem, junto
 com a Amostragem de Importância Múltipla. Para fazer isso, para cada imagem,
 modificamos o integrador, removendo as contribuições de outros métodos de
 amostragem e removendo o peso $w$ da contribuição do método escolhido.
 
 Com os resultados, observa-se que a Amostragem por BRDF não captura
 eficientemente a contribuição da fonte de luz pequena, resultando em uma imagem
-mais escura. Isso decorre do fato de ser pequena a probabilidade da fonte de
-luz pequena ser ``acertada'' pela amostragem por BRDF. Conforme esperado,
-porém, a esfera azul possui pouca variância. Isso acontece pelo fato do BRDF de
-Phong da esfera azul ter um viés alto para direções de reflexões especulares.
+mais escura. Isso decorre do fato de ser pequena a probabilidade de a fonte de
+luz pequena ser amostrada por BRDF. Conforme esperado, porém, a esfera azul
+possui pouca variância. Isso acontece pelo fato de o BRDF de Phong da esfera
+azul ter um viés alto para direções de reflexões especulares.
 
 Na Amostragem de Fontes de Luz, temos uma representação mais fidedigna da
 iluminação dada pela fonte de luz pequena. Isso é esperado, já que, como sempre
@@ -101,10 +101,10 @@ elevada, pois as amostras nas fontes de luz raramente estão na mesma direção
 que o lóbulo especular da BRDF de Phong.
 
 Agora, na Amostragem de Importância Múltipla, ao combinar os pontos fortes das
-duas técnicas, diminuímos significativamente a variância e ruído final. Ainda
+duas técnicas, diminuímos significativamente a variância e o ruído final. Ainda
 assim, nota-se que a esfera vermelha possui certa quantidade de variância. Isso
 acontece pois, nas duas técnicas, por BRDF e de Fontes de Luz, a variância
-daquela região é alta. Dessa forma, não temos uma técnica que é efetiva em
+daquela região é alta. Dessa forma, não temos uma técnica efetiva em
 amostrar aquela área, e então a variância continua alta mesmo depois da
 Amostragem de Importância Múltipla.
 
@@ -149,7 +149,7 @@ fazer a Amostragem de Importância Múltipla com três técnicas.
 Na \autoref{fig:somelight} utilizamos de uma visualização para identificar os
 tipos de amostras que mais contribuem em cada pixel. Pixels com a cor vermelha
 indicam que a amostragem do caminho foi pelas fontes de luz. Já os pixels em
-cor azul, tiveram caminhos amostrados majoritariamente pelo BRDF. Finalmente,
+cor azul tiveram caminhos amostrados majoritariamente pelo BRDF. Finalmente,
 os pixels verdes não utilizam a Amostragem de Importância Múltipla, é o caso de
 reflexões de espelhos perfeitos e caminhos que saem do sensor diretamente para
 uma fonte de luz.
@@ -170,9 +170,9 @@ amostras por BRDF onde há mais contribuição da fonte de luz grande.
 
 \section{Conclusão}
 
-Os resultados mostram que a Amostragem de Importância Múltipla, implementada
+Os resultados evidenciam que a Amostragem de Importância Múltipla, implementada
 conforme descrita no \autoref{cap:implem}, reduz efetivamente a
 variância em comparação com as técnicas de amostragem individuais, ao atribuir
-pesos maiores para amostras com menor variância e pesos menores com amostras
+pesos maiores para amostras com menor variância e pesos menores para amostras
 com maior variância.
 

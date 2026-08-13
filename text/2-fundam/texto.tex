@@ -100,10 +100,9 @@ de \emph{Equação da Renderização}, diversas vezes, porém com a notação ma
 comumente utilizada de \citet{veach97}:
 
 \[
-  L_o(x, \omega_o) = L_e(x, w_o) + \int_{\omega_i \in \mathcal{H}} L_i(x, w_i)
-  f_s(x, \omega_i \rightarrow \omega_o) | \cos\theta |
+  L_o(x, \omega_o) = L_e(x, \omega_o) + \int_{\omega_i \in \mathcal{H}} L_i(x,
+  \omega_i) f_s(x, \omega_i \rightarrow \omega_o) | \cos\theta |
   d\sigma_x(\omega_i)
-  \label{eq:render}
 \]
 
 A medida física de $L_o$ é chamada de \emph{radiância}, e pode ser pensada como
@@ -117,13 +116,13 @@ ponto $x$. Essas duas quantidades são relacionadas pela fórmula
   L_i(x, \omega) = L_o(\gamma(x, \omega), -\omega)
 \]
 
-onde $\gamma(x, \omega_i)$ é a função de \emph{Ray Casting}, que retorna o
-primeiro ponto da geometria na direção $\omega_i$ a partir do ponto $x$. Logo,
+onde $\gamma(x, \omega)$ é a função de \emph{Ray Casting}, que retorna o
+primeiro ponto da geometria na direção $\omega$ a partir do ponto $x$. Logo,
 podemos substituir e temos a equação da renderização no formato que iremos
 utilizar nesse trabalho. Também definimos $L_o$ como $L$. Assim,
 
 \begin{equation}
-  L(x, \omega_o) = L_e(x, w_o) + \int_{\omega_i \in \mathcal{H}} L(\gamma(x, \omega_i),
+  L(x, \omega_o) = L_e(x, \omega_o) + \int_{\omega_i \in \mathcal{H}} L(\gamma(x, \omega_i),
   -\omega_i) f_s(x, \omega_i \rightarrow \omega_o) | \cos\theta |
   d\sigma_x(\omega_i)
   \label{eq:render}
@@ -131,19 +130,19 @@ utilizar nesse trabalho. Também definimos $L_o$ como $L$. Assim,
 
 A Equação da Renderização segue o raciocínio da seção passada: a radiância
 vinda do ponto $x$ na direção $\omega_o$ é igual à soma das radiâncias
-vindas de outras direções no hemisfério $\mathcal{H}$ de $x$, $L_i(x,
+vindas de outras direções no hemisfério $\mathcal{H}$ de $x$, $L(x,
 \omega_i)$, ponderadas por um peso, $f_s(x, \omega_i \rightarrow \omega_o)$, e
 um termo de geometria $| \cos \theta |$. Por último, temos a medida de ângulo
 sólido $d\sigma_x(\omega_i)$ que indica a integração em uma seção infinitesimal
 do hemisfério ao redor do ponto $x$. 
 
 O peso $f_s$ é chamado de BRDF, \emph{bidirectional reflectance distribution
-function} e diz, dada uma direção de incidência e uma direção de reflexão, qual
+function}, e diz, dada uma direção de incidência e uma direção de reflexão, qual
 a porcentagem de raios de luz refletida no ponto $x$. Ou, especificamente, qual
 a razão da radiância vinda da direção $\omega_i$, refletida no ponto $x$ e que
 sai na direção $\omega_o$.
 
-O termo de geometria $| \cos \theta |$, serve para incorporar o efeito da lei
+O termo de geometria $| \cos \theta |$ permite incorporar o efeito da lei
 de Lambert, que diz que quanto maior for o ângulo de incidência em relação à
 normal da superfície, menor a intensidade efetiva da radiância incidente.
 
@@ -165,7 +164,7 @@ Como visto na seção anterior, para resolver o problema da renderização,
 precisamos resolver uma integral especialmente complicada. Tirando em casos
 triviais\footnote{Por exemplo, no caso em que estamos no centro de uma esfera e
 toda a superfície dessa esfera é difusa ($f_s$ é constante), em que aí podemos
-calcular $L(x \rightarrow x')$ analiticamente, sem entrar na recursão.}, devido
+calcular $L$ analiticamente, sem entrar na recursão.}, devido
 à alta dimensionalidade da integral, é necessário utilizar métodos mais
 potentes. Um desses é o método de Monte Carlo, introduzido por
 \citet{metropolis49}.
@@ -199,8 +198,8 @@ que $p(x) > 0$ para todo $x$ tal que $f(x) \not = 0$, podemos escrever
   \left\langle \frac{f(X)}{p(X)} \right\rangle
 \end{align*}
 
-Onde usamos a notação $\langle Y \rangle$ para denotar a esperança de uma
-variável aleatória $Y$. Agora, para fazer a estimativa, podemos usar a Lei dos
+Onde utilizamos a notação $\langle Y \rangle$ para denotar a esperança de uma
+variável aleatória $Y$. Agora, para fazer a estimativa, podemos utilizar a Lei dos
 Grandes Números, que diz que
 
 \[ \langle Y \rangle \approx \frac{1}{N} \sum_{i=1}^N Y_i \]
@@ -275,9 +274,9 @@ e assim podemos fazer um estimador Monte Carlo
   I_N = \frac{1}{N} \sum_{i=1}^N \frac{f(X_i)}{p(X_i)}
 \]
 
-\section{Técnicas De Amostragem}
+\section{Técnicas de Amostragem}
 
-Ao usar o estimador da última seção, porém, precisamos escolher uma técnica de
+Ao utilizar o estimador da última seção, porém, precisamos escolher uma técnica de
 amostragem e a distribuição $p$ correspondente. Como
 
 \[
@@ -294,7 +293,7 @@ variância) quando os outros termos de $f$ são aproximadamente uniformes e a
 forma de $f$ se aproxima da de $p_b$. Isso acontece, principalmente, quando $L$
 por si só é aproximadamente uniforme.
 
-Alguns casos nos quais a amostragem por BRDF se destaca são
+Alguns casos nos quais a amostragem por BRDF se destaca são:
 
 \begin{itemize}
   \item Cenas em céu aberto, onde o próprio céu é visto como uma
@@ -415,11 +414,11 @@ $p_\omega$ a probabilidade em relação à medida de ângulo sólido.
 
 \section{Path Tracing}
 
-\citet{kajiya86} mostrou que métodos de Ray Tracing da época \citep{cook84,
-whitted80}, nos quais múltiplos raios são criados a cada intersecção,
-desnecessariamente gastam recursos computacionais em cálculos que pouco
-contribuem para o valor final da integral. Intuitivamente, isso ocorre devido à
-natureza multiplicativa da equação da renderização, ao passo que a cada
+\citet{kajiya86} mostrou que métodos de \emph{Ray Tracing} da época
+\citep{cook84, whitted80}, nos quais múltiplos raios são criados a cada
+intersecção, desnecessariamente gastam recursos computacionais em cálculos que
+pouco contribuem para o valor final da integral. Intuitivamente, isso ocorre
+devido à natureza multiplicativa da equação da renderização, ao passo que a cada
 intersecção reduzimos a contribuição por fatores como o BRDF e o termo de
 geometria, deixando raios mais profundos na árvore com valor muito baixo de
 contribuição.
@@ -427,9 +426,9 @@ contribuição.
 Como alternativa, Kajiya introduziu o \emph{Path Tracing}, em que não há
 ramificações e apenas um novo raio é criado a cada intersecção, assim
 efetivamente deixando mais recursos para explorar direções iniciais diferentes
-com mais contribuição, diminuindo em geral a variância. Essa lista de raios
-(que antes era uma árvore de raios e agora representada por uma tupla) é chamada
-de \emph{caminho}.
+com mais contribuição, diminuindo em geral a variância. Essa lista de raios (que
+antes era uma árvore de raios e agora é representada por uma tupla) é chamada de
+\emph{caminho}.
 
 \citet{veach97} formalizou esse método com a formulação da equação de
 renderização em uma integral de caminhos, possibilitando uma amostragem formal
@@ -446,25 +445,25 @@ caminho $\bar{x} = (x_1, \ldots, x_k)$, de tamanho $k$, temos
 \end{equation}
 
 Onde $\omega_{i,m} = \frac{(x_{m-1} - x_{m})}{|(x_{m-1} - x_{m})|}$,
-$\omega_{o,m} = \frac{(x_{m+1} - x_{m})}{|(x_{m+1} - x_{m})|}$ e
-$\mathcal{P}_k$ é o espaço de caminhos de tamanho $k$.\footnote{O espaço de
-caminhos aqui é conjunto de sequências de direções $(\omega_1, \ldots,
-\omega_k)$, junto com uma posição inicial $x_0$. Podemos descobrir os
-\emph{pontos de um caminho} utilizando a função de \emph{Ray Casting}: $x_i =
-\gamma(x_{i-1}, \omega_i)$. Assim, podemos representar um caminho apenas com
-seus pontos $\bar{x} = (x_1, \ldots, x_k)$. Neste trabalho, utilizaremos
-majoritariamente a notação de pontos para se referir à um caminho.
-Diferentemente, Veach usa diretamente os pontos de um caminho como o caminho em
-sí, porém isso introduz diversos termos extras de visibilidade e de correção de
-medidas, que não precisamos nos preocupar neste trabalho.}
+$\omega_{o,m} = \frac{(x_{m+1} - x_{m})}{|(x_{m+1} - x_{m})|}$ e $\mathcal{P}_k$
+é o espaço de caminhos de tamanho $k$.\footnote{O espaço de caminhos aqui é
+conjunto de sequências de direções $(\omega_1, \ldots, \omega_k)$, junto de uma
+posição inicial $x_0$. Podemos descobrir os \emph{pontos de um caminho}
+utilizando a função de \emph{Ray Casting}: $x_i = \gamma(x_{i-1}, \omega_i)$.
+Assim, podemos representar um caminho apenas com seus pontos $\bar{x} = (x_1,
+\ldots, x_k)$. Neste trabalho, utilizaremos majoritariamente a notação de pontos
+para nos referirmos a um caminho. Diferentemente, Veach utiliza diretamente os
+pontos de um caminho como o caminho em si, porém isso introduz diversos termos
+extras de visibilidade e de correção de medidas e que não precisamos nos
+preocupar neste trabalho.}
 
-Note, agora, que o domínio de integração, que antes eram pontos independentes
-da geometria, virou caminhos completos das fontes de luz até os sensores. Com
-isso, formalmente, precisamos adaptar nossas técnicas de amostragem para
-obtermos caminhos, e não pontos/direções. Para fazer isso, podemos amostrar $k$
-pontos, um de cada vez, cada um utilizando uma das técnicas de amostragem. Além
-disso, precisamos de uma distribuição de probabilidade para essa amostra de
-caminho. Ela é dada por
+Note, agora, que o domínio de integração, que antes era o conjunto de pontos da
+geometria, virou caminhos completos das fontes de luz até os sensores. Com isso,
+formalmente, precisamos adaptar nossas técnicas de amostragem para obtermos
+caminhos, e não pontos/direções. Para fazer isso, podemos amostrar $k$ pontos,
+um de cada vez, cada um utilizando uma das técnicas de amostragem. Além disso,
+precisamos de uma distribuição de probabilidade para essa amostra de caminho.
+Ela é dada por
 
 \[
   p(\bar{x}) = p_1(x_1) \ldots p_k(x_k)
@@ -476,13 +475,13 @@ caminho $\bar{x}$.
 
 \section{Conclusão}
 
-Neste capítulo vimos os conceitos essenciais e a maquinaria matemática pelos
-quais iremos utilizar na implementação de um Path Tracer. Começando pela
+Neste capítulo, vimos os conceitos essenciais e a maquinaria matemática pelos
+quais iremos utilizar na implementação de um \emph{Path Tracer}. Começando pela
 equação da renderização, onde resumimos a intuição por trás da formação de
-imagens realísticas em um equação integral recursiva; seguindo pelo método de
-Monte Carlo, que podemos usar para resolver tal equação algoritmicamente; e
-então vimos diferentes maneiras de obter amostras, cada uma com suas vantagens
-e desvantagens. Também vimos um método para combinar essas técnicas de
-amostragem, permitindo a redução de variância; e, enfim, vimos uma maneira de
-interpretar a equação da renderização como uma integral onde o domínio de
-integração são os caminhos que existem entre as fontes de luz e os sensores;
+imagens realísticas em uma equação integral recursiva; seguindo pelo método de
+Monte Carlo, que podemos utilizar para resolver tal equação algoritmicamente; e
+então vimos diferentes maneiras de obter amostras, cada uma com suas vantagens e
+desvantagens. Também vimos um método para combinar essas técnicas de amostragem,
+permitindo a redução de variância; e, enfim, vimos uma maneira de interpretar a
+equação da renderização como uma integral onde o domínio de integração são os
+caminhos que existem entre as fontes de luz e os sensores.
