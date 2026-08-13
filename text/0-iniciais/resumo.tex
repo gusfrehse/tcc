@@ -10,12 +10,12 @@
   implementamos um \emph{Path Tracer} e exploramos a Amostragem de Importância
   Múltipla \citep{veach95}, uma técnica que combina diferentes estratégias de
   amostragem de forma a reduzir a variância do estimador. A implementação
-  combina amostragem da BRDF e amostragem direta de fontes de luz, e a
-  derivação dos pesos é apresentada de forma explícita para o caminho completo.
-  A efetividade da técnica é avaliada por meio da comparação de imagens
-  renderizadas com igual número de amostras, com e sem a Amostragem de
-  Importância Múltipla. Os resultados demonstram que a técnica reduz
-  significativamente a variância do estimador: imagens de variância
+  combina amostragem da distribuição de refletância e amostragem direta de
+  fontes de luz, e a derivação dos pesos é apresentada de forma explícita para
+  o caminho completo. A efetividade da técnica é avaliada por meio da
+  comparação de imagens renderizadas com igual número de amostras, com e sem a
+  Amostragem de Importância Múltipla. Os resultados demonstram que a técnica
+  reduz significativamente a variância do estimador: imagens de variância
   renderizadas com igual número de amostras mostram uma redução expressiva, com
   a versão sem Amostragem de Importância Múltipla apresentando variância
   visivelmente elevada em contraste com a versão que a utiliza.

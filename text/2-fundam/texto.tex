@@ -1,4 +1,4 @@
-\chapter{Fundamentacão Teórica}
+\chapter{Fundamentação Teórica}
 \label{cap:fundamentacao}
 
 % figuras estão no subdiretório "figuras/" dentro deste capítulo
@@ -12,7 +12,7 @@ descrição de uma cena virtual (geometria, posição das fontes de luz, posiç�
 direção da câmera), qual a cor de cada um dos pixels da imagem que essa câmera
 capturaria, considerando que as leis da física aplicariam nessa cena virtual.
 
-Nesse trabalho iremos simplificar nosso tratamento para luzes de somente uma
+Nesse trabalho, iremos simplificar nosso tratamento para luzes de somente uma
 frequência (monocromática), porém os algoritmos são facilmente traduzidos para
 múltiplas frequências.
 
@@ -23,14 +23,14 @@ próximo de zero. Por outro lado, caso chegue bastante luz, o valor será mais
 alto.\footnote{O valor específico depende de muitos fatores, codificação e
 decodificação da imagem, características específicas do sensor, características
 específicas do monitor, configurações de sistema operacional, entre outras. Por
-causa dessa complexidade não é incomum achar sistemas que não produzem imagens
+causa dessa complexidade, não é incomum achar sistemas que não produzem imagens
 corretas.}
 
 Outra simplificação comum que fazemos é assumir o modelo de câmera
 \emph{pinhole} \cite[Cap. 5]{pbrt4}, no qual cada sensor recebe luz de apenas
 uma direção.\footnote{Nos olhos humanos e em câmeras com lentes, raios de luz
 de múltiplas direções podem atingir a mesma célula sensorial/sensor. Isso causa
-diversos efeitos, como por exemplo de profundidade de campo.}
+diversos efeitos, como, por exemplo, de profundidade de campo.}
 
 \begin{figure}[ht]
     \centering
@@ -41,18 +41,18 @@ diversos efeitos, como por exemplo de profundidade de campo.}
     \label{fig:pinhole}
 \end{figure}
 
-
 Com base nesse fato, podemos imaginar uma forma de descobrir a cor de cada
 pixel. Como a luz atravessa o espaço em linha reta,\footnote{Pelo menos para o
-escopo desse trabalho. A principal causa de caminhos não lineares são meios em
-que o índice de refração é variado contínuamente, alguns exemplos clássicos são
-a efeitos atmosféricos (razão de que o céu continua claro depois do sol se pôr)
-e uma solução de açúcar e água.} podemos seguir a direção do sensor para
+escopo desse trabalho. A principal causa de caminhos não lineares são meios nos
+quais o índice de refração é variado continuamente, alguns exemplos clássicos
+são os efeitos atmosféricos (razão de que o céu continua claro depois do sol se
+pôr) e uma solução de açúcar e água.} podemos seguir a direção do sensor para
 descobrir de qual ponto pertencente à geometria ela está vindo, e qual a sua
 intensidade. Esse ponto pode estar emitindo luz na direção do sensor de duas
 maneiras. A primeira é uma emissão autônoma, que ocorre quando o ponto é uma
-fonte de luz (um LED por exemplo, ou o sol). A outra é quando existe a reflexão
-de raios que bateram nesse ponto e foram para a direção do nosso sensor.
+fonte de luz (um LED, por exemplo, ou o sol). A outra é quando existe a
+reflexão de raios que bateram nesse ponto e foram para a direção do nosso
+sensor.
 
 O primeiro é um termo que depende apenas da posição do ponto e da direção de
 saída (direção para o sensor). O segundo é mais complicado. Dependendo da
@@ -67,21 +67,21 @@ extremos, no espelho temos quase somente uma reflexão \emph{especular},
 enquanto na superfície fosca temos quase somente uma reflexão \emph{difusa}. Na
 prática, as superfícies costumam ter uma mistura desses dois tipos de reflexão.
 
-Então para saber qual a intensidade da luz vinda desse ponto na direção do
+Então, para determinar a intensidade da luz vinda desse ponto na direção do
 sensor, precisamos, no caso mais geral, saber a intensidade dos raios de todas
 as outras direções que chegam nesse ponto (pois, dependendo da superfície,
 possivelmente qualquer um desses raios incidentes poderá refletir na direção do
-sensor). Logo, precisamos calcular, para todas as direções, quanto de luz que
-chega de cada direção. Note que, para cada direção incidente, esse é exatamente
-o problema que começamos a resolver: em vez do sensor e sua direção
+sensor). Logo, precisamos calcular, para todas as direções, quanto de luz chega
+de cada direção. Note que, para cada direção incidente, esse é exatamente o
+problema que começamos a resolver: em vez do sensor e sua direção
 correspondente, temos o ponto de geometria que achamos antes e uma direção nova
-(dentre as infinitas no hemisfério ao redor desse ponto que também precisariamos
-descobrir).
+(dentre as infinitas no hemisfério ao redor desse ponto que também
+precisaríamos descobrir).
 
 Parece que estamos entrando em um ciclo, e estamos. Não só precisamos calcular
 novamente a intensidade de um raio de luz, como precisamos calcular para
 infinitos raios que chegam nesse ponto. E cada um desses novos raios poderá ter
-sido refletido de outro ponto, e nesse outro ponto teríamos de investigar
+sido refletido de outro ponto, e nesse outro ponto teríamos de investigar a
 origem de mais infinitos raios incidentes, e assim em diante.
 
 \section{Equação da Renderização}
@@ -95,8 +95,8 @@ origem de mais infinitos raios incidentes, e assim em diante.
 
 Na década de 80, \cite{kajiya86}, baseando-se em modelos de transporte de
 partículas já existentes utilizados em cálculos físicos, explicitou esse
-problema em uma equação integral recursiva. Usaremos essa equação, chamada de
-\emph{Equação da Renderização}, diversas vezes, porém com a notação mais
+problema em uma equação integral recursiva. Utilizaremos essa equação, chamada
+de \emph{Equação da Renderização}, diversas vezes, porém com a notação mais
 comumente utilizada de \citet{veach97}:
 
 \[
@@ -130,25 +130,25 @@ utilizar nesse trabalho. Também definimos $L_o$ como $L$. Assim,
 \end{equation}
 
 A Equação da Renderização segue o raciocínio da seção passada: a radiância
-vinda do ponto $x$ na direção $\omega_o$ é igual à soma das das radiâncias
-vindas de outros direções no hemisfério $\mathcal{H}$ de $x$, $L_i(x,
+vinda do ponto $x$ na direção $\omega_o$ é igual à soma das radiâncias
+vindas de outras direções no hemisfério $\mathcal{H}$ de $x$, $L_i(x,
 \omega_i)$, ponderadas por um peso, $f_s(x, \omega_i \rightarrow \omega_o)$, e
-um termo de geometria $| \cos \theta |$. Por último temos a medida de ângulo
+um termo de geometria $| \cos \theta |$. Por último, temos a medida de ângulo
 sólido $d\sigma_x(\omega_i)$ que indica a integração em uma seção infinitesimal
-do hemisfério redor do ponto $x$. 
+do hemisfério ao redor do ponto $x$. 
 
 O peso $f_s$ é chamado de BRDF, \emph{bidirectional reflectance distribution
 function} e diz, dada uma direção de incidência e uma direção de reflexão, qual
-a porcentagem de raios de luz que é refletida no ponto $x$. Ou,
-especificamente, qual a razão da radiância vinda da direção $\omega_i$,
-refletida no ponto $x$ e que sai na direção $\omega_o$.
+a porcentagem de raios de luz refletida no ponto $x$. Ou, especificamente, qual
+a razão da radiância vinda da direção $\omega_i$, refletida no ponto $x$ e que
+sai na direção $\omega_o$.
 
-O termo de geometria $| \cos \theta |$, serve para incorporar o efeito da
-lei de Lambert, que diz que quanto maior o ângulo de incidência em relação à
+O termo de geometria $| \cos \theta |$, serve para incorporar o efeito da lei
+de Lambert, que diz que quanto maior for o ângulo de incidência em relação à
 normal da superfície, menor a intensidade efetiva da radiância incidente.
 
 Para mais informações sobre as quantidades radiométricas, recomendamos a
-leitura de \citet[Cap. 5]{pbrt4} e \citet[Cap.3]{veach97}. Porém, acreditamos
+leitura de \citet[Cap. 5]{pbrt4} e \citet[Cap. 3]{veach97}. Porém, acreditamos
 que a ideia mais intuitiva de radiância como a intensidade de luz vindo de uma
 direção é suficiente para entender esse trabalho.
 
@@ -161,18 +161,17 @@ faremos nas seções seguintes.
 
 \section{Integração Com O Método De Monte Carlo}
 
-Como visto na seção anterior, para resolver o problema da renderização
+Como visto na seção anterior, para resolver o problema da renderização,
 precisamos resolver uma integral especialmente complicada. Tirando em casos
-triviais\footnote{Por exemplo no caso em que estamos no centro de uma esfera e
+triviais\footnote{Por exemplo, no caso em que estamos no centro de uma esfera e
 toda a superfície dessa esfera é difusa ($f_s$ é constante), em que aí podemos
 calcular $L(x \rightarrow x')$ analiticamente, sem entrar na recursão.}, devido
 à alta dimensionalidade da integral, é necessário utilizar métodos mais
 potentes. Um desses é o método de Monte Carlo, introduzido por
 \citet{metropolis49}.
 
-
-Para explicar o método, será mais fácil entender no caso discreto e em seguida
-generalizar para a versão contínua, que é a que iremos utilizar.
+Para explicar o método, será mais fácil entender no caso discreto e, em
+seguida, generalizar para a versão contínua, a que iremos utilizar no trabalho.
 
 Vamos considerar que queremos calcular a soma
 
@@ -182,14 +181,13 @@ Vamos considerar que queremos calcular a soma
 
 para uma função $f: D \rightarrow \mathbb{R}$ e $D$ um conjunto finito
 qualquer. Consideramos também que a função $f$ é bastante custosa
-computacionalmente, então queremos diminuir o número de vezes que avaliamos
-ela. 
+computacionalmente, então queremos diminuir o número de vezes que a avaliamos. 
 
 Como $D$ pode ter potencialmente um grande número de elementos, torna-se
-invíavel calcular $f$ em todos os elementos de $D$ para obter o valor exato de
+inviável calcular $f$ em todos os elementos de $D$ para obter o valor exato de
 $S$. O que podemos fazer, porém, é obter uma estimativa.
 
-Para fazer isso, primeiro notamos que é possível escrever a soma original como
+Para fazer isso, primeiro notamos ser possível escrever a soma original como
 uma média (chamada também de valor esperado ou esperança) de outra função
 aplicada a uma variável aleatória.
 
@@ -219,46 +217,46 @@ versão contínua, queremos calcular a integral
 \[ I = \int_{x \in D} f(x) dx = \int_{x \in D} \frac{f(x)}{p(x)} p(x) dx =
 \left\langle \frac{f(X)}{p(X)} \right\rangle \]
 
-agora com $D$ contínuo e mensurável. Assim podemos usar o mesmo estimador e
+agora com $D$ contínuo e mensurável. Assim podemos utilizar o mesmo estimador e
 temos
 
 \[ I = \left\langle \frac{f(X)}{p(X)} \right\rangle \approx \frac{1}{N}
 \sum_{i=1}^N \frac{f(X_i)}{p(X_i)} = I_N \]
 
-É importante notar que podemos escolher qualquer $p$, desde que seja uma a
+É importante notar que podemos escolher qualquer $p$, desde que este seja uma
 distribuição de probabilidade de $D$. Com isso em mente, podemos utilizar um
-$p$ com objetivo de minimizar a variância. Uma variância menor significa que
+$p$ com o objetivo de minimizar a variância. Uma variância menor significa que
 precisamos de menos amostras (menor $N$) para chegar mais perto do valor real
-$I$, o que torna o método muito mais eficiente.
+$I$, tornando o método muito mais eficiente.
 
-Aqui a escolha ideal de $p$ é amplamente conhecida \citep{kalos08} e é dada por
+Aqui, a escolha ideal de $p$ é amplamente conhecida \citep{kalos08} e dada por
 $p(x) = c \cdot f(x)$ onde $c$ é calculada para que $p$ permaneça normalizado
 
 \[
   c = \frac{1}{\int_{x \in D} f(x) dx}
 \]
 
-Dessa forma $\frac{f(X)}{p(X)} = 1/c$, uma constante, e a variância é zero. O
-problema é que, como sabemos, não queremos calcular $f$ diretamente, então em
-vez disso podemos utilizar uma distribuição $p$ que se aproxime de $c \cdot
+Dessa forma, $\frac{f(X)}{p(X)} = 1/c$, uma constante, e a variância é zero. O
+problema é que, como sabemos, não queremos calcular $f$ diretamente, então, em
+vez disso, podemos utilizar uma distribuição $p$ que se aproxime de $c \cdot
 f(x)$, assim reduzindo a variância.
 
 Essa técnica, de escolher um $p$ com ``uma curva semelhante'' à $f$, se chama
 \emph{amostragem de importância}. Intuitivamente, podemos pensar que escolhemos
-uma distribuição de probabilidade que vai deixar mais frequente amostras que
-são mais próximas do resultado final e menos frequente amostras que são muito
+uma distribuição de probabilidade que vai deixar mais frequentes amostras que
+são mais próximas do resultado final e menos frequentes amostras que são muito
 diferentes do resultado final, assim diminuindo o número de amostras que
 precisamos para ter um resultado parecido com o verdadeiro.
 
-Usando como exemplo o path tracing, uma amostra ruim seria um caminho de luz
-que reflete várias vezes na geometria antes de chegar no sensor. Como em cada
-reflexão ela perde um pouco de energia, a contribuição final no valor do pixel
-é mínima. Contrastando com o caso de um caminho de iluminação direta, em que o
-raio de luz vai direto da iluminação até o sensor, que teria uma grande
-contribuição no valor final do pixel.
+Utilizando como exemplo o \emph{Path Tracing}, uma amostra ruim seria um
+caminho de luz que reflete várias vezes na geometria antes de chegar no sensor.
+Como em cada reflexão ela perde um pouco de energia, a contribuição final no
+valor do pixel é mínima. Contrastando com o caso de um caminho de iluminação
+direta, no qual o raio de luz vai direto da iluminação até o sensor, que teria
+uma grande contribuição no valor final do pixel.
 
-Na prática, usando como exemplo o nosso problema de síntese de imagens, uma
-amostra ruim seria uma direção em que não há nenhuma luz (uma parte escura da
+Na prática, utilizando como exemplo o nosso problema de síntese de imagens, uma
+amostra ruim seria uma direção na qual não há nenhuma luz (uma parte escura da
 cena). Uma amostra boa, por outro lado, seria uma na direção de uma fonte de
 luz desobstruída.
 
@@ -296,12 +294,12 @@ variância) quando os outros termos de $f$ são aproximadamente uniformes e a
 forma de $f$ se aproxima da de $p_b$. Isso acontece, principalmente, quando $L$
 por si só é aproximadamente uniforme.
 
-Alguns casos onde a amostragem por BRDF se destaca são
+Alguns casos nos quais a amostragem por BRDF se destaca são
 
 \begin{itemize}
   \item Cenas em céu aberto, onde o próprio céu é visto como uma
       fonte de luz. Isso acontece pois quase todas as direções possuem algum
-      valor de radiância. Assim o termo com mais impacto na forma de $f$ é o
+      valor de radiância. Assim, o termo com mais impacto na forma de $f$ é o
       próprio BRDF.
   \item Materiais reflexivos, como metais e espelhos. Nesse
       caso, os BRDF costumam apresentar picos bastante acentuados em torno
@@ -310,7 +308,7 @@ Alguns casos onde a amostragem por BRDF se destaca são
       eficiente.
 \end{itemize}
 
-Existem casos, porém, em que a amostragem por BRDF não é a ideal. Em uma cena
+Existem casos, porém, nos quais a amostragem por BRDF não é a ideal. Em uma cena
 com somente uma pequena fonte de luz, por exemplo, a chance de ``batermos'' na
 fonte de luz, amostrando de acordo com a distribuição do BRDF, é muito pequena.
 Uma cena noturna, portanto, com apenas a luz da lua e de alguns postes,
@@ -321,21 +319,21 @@ de zero em outras direções. Assim, o termo $L$ passa a dominar a forma de $f$,
 que deixa de se assemelhar a $p_b$, aumentando consequentemente a variância do
 estimador.
 
-Uma forma de resolver esse problema é usar outra estratégia de amostragem, como
-por exemplo a \emph{Amostragem de Fontes de Luz}, com distribuição de
+Uma forma de resolver esse problema é utilizar outra estratégia de amostragem,
+como por exemplo a \emph{Amostragem de Fontes de Luz}, com distribuição de
 probabilidade $p_l$. Nessa estratégia, amostramos um ponto da superfície de uma
 das fontes de luz da cena e geramos uma direção em direção a esse ponto. Dessa
-forma, garantimos que a amostra estará direcionada para uma região em que, caso
-não haja obstrução, o valor de $L$ será significativo. Essa técnica, também
-comumente chamada de \emph{Next Event Estimation} (NEE), provém da literatura
-de transporte de partículas da Física \citep{coveyou67}.
+forma, garantimos que a amostra estará direcionada para uma região na qual,
+caso não haja obstrução, o valor de $L$ será significativo. Essa técnica,
+também comumente chamada de \emph{Next Event Estimation} (NEE), provém da
+literatura de transporte de partículas da Física \citep{coveyou67}.
 
 Exemplos de casos que melhor aproveitam a amostragem de fontes de luz são
 
 \begin{itemize}
   \item Materiais com BRDF quase uniforme, ou seja, materiais foscos. Como o
     BRDF é aproximadamente uniforme, o formato de $f$ é dado por $L$.
-  \item Casos em que existem fontes de luz pequenas e com alta intensidade,
+  \item Casos nos quais existem fontes de luz pequenas e com alta intensidade,
     como por exemplo uma cena noturna.
 \end{itemize}
 
@@ -343,14 +341,14 @@ Nesse trabalho, iremos utilizar essas duas estratégias de amostragem. Fazemos
 essa escolha devido à relativa simplicidade de implementação e ao fato de que,
 quando combinadas (ver próximas sessões), essas estratégias produzem resultados
 satisfatórios em uma ampla variedade de cenas. Porém, existem outros métodos
-usados para amostragem, inclusive trata-se de uma das áreas com mais pesquisas
+utilizados para amostragem, inclusive trata-se de uma das áreas com mais pesquisas
 recentemente \citep{lin22, yan25}. 
 
 \section{Amostragem De Importância Múltipla}
 \label{sec:mis}
 
 Na seção anterior, apresentamos duas maneiras de obter amostras para nosso
-estimador de Monte Carlo, uma por meio da Amostragem por BRDF e outro por meio
+estimador de Monte Carlo, uma por meio da Amostragem por BRDF e outra por meio
 da Amostragem de Fontes de Luz. Cada uma dessas estratégias funciona melhor em
 certos casos, e é interessante notar que esses casos são, em grande parte,
 complementares: quando a estratégia de amostragem de fontes de luz é melhor, a
@@ -358,12 +356,12 @@ estratégia por BRDF é pior, e vice-versa.
 
 Nosso estimador Monte Carlo espera apenas uma técnica de amostragem com uma
 distribuição de probabilidade correspondente, então precisamos de um jeito de
-combinar as duas técnicas.
+combinar ambas as técnicas.
 
-Nesse trabalho usaremos o método formalizado por \citet{veach95} e que é
+Nesse trabalho, utilizaremos o método formalizado por \citet{veach95} que é
 amplamente utilizado. Os autores mostram que uma grande classe de estratégias
 para combinar $n$ amostras provenientes de diferentes distribuições pode ser
-representado com o seguinte estimador:
+representada com o seguinte estimador:
 
 \begin{equation*}
   I = \sum_{i=1}^n \frac{1}{n_i} \sum_{j=1}^{n_i} w_i(X_{i,j})
@@ -371,16 +369,16 @@ representado com o seguinte estimador:
 \end{equation*}
 
 Onde cada $i$ corresponde a uma técnica de amostragem, $n_i$ o número de
-amostras utilizadas usando essa técnica, $p_i$ a distribuição de probabilidade
-correspondente, $w_i$ uma função de peso que escolheremos e $X_{i,j}$ para a
-$j$-ésima amostra obtida da técnica $i$. 
+amostras utilizadas utilizando essa técnica, $p_i$ a distribuição de
+probabilidade correspondente, $w_i$ uma função de peso que escolheremos e
+$X_{i,j}$ para a $j$-ésima amostra obtida da técnica $i$. 
 
-Os pesos $w_i$ necessitam atender duas condições. A primeira é que $\sum_i
+Os pesos $w_i$ necessitam atender a duas condições. A primeira é que $\sum_i
 w_i(x) = 1$ sempre que $f(x) \not = 0$. A segunda é que $w_i(x) = 0$ sempre que
 $p_i(x) = 0$. Essas condições garantem que o estimador não seja enviesado.
 
-Neste trabalho usaremos sempre apenas uma amostra por técnica, então podemos
-simplificar o estimador para 
+Neste trabalho, utilizaremos sempre apenas uma amostra por técnica, então
+podemos simplificar o estimador para 
 
 \begin{equation}
   I = \sum_{i=1}^n w_i(X_{i}) \frac{f(X_i)}{p_i(X_i)}
@@ -402,25 +400,25 @@ precisamos avaliar cada $p_j$ em nossa amostra $X_i$, que foi amostrada segundo
 a distribuição $p_i$. A intuição por trás é que a amostra $X_i$ terá mais
 contribuição quando $p_i$ for alto relativamente aos outros $p$. 
 
-Uma restrição, porém, é que todas as distribuições devem estar usando a mesma
-medida de probabilidade. No escopo desse trabalho vamos converter a medida de
-direções, usada na Amostragem por BRDF, para a medida de área, usada na
-Amostragem de Fontes de Luz. Essa conversão é dada pelo jacobiano da
-transformação \citep[Cap 8.2.2.2]{veach97}:
+Uma restrição, porém, é que todas as distribuições devem estar utilizando a
+mesma medida de probabilidade. No escopo desse trabalho, vamos converter a
+medida de direções, utilizada na Amostragem por BRDF, para a medida de área,
+utilizada na Amostragem de Fontes de Luz. Essa conversão é dada pelo jacobiano
+da transformação \citep[Cap. 8.2.2.2]{veach97}:
 
 \[
   p(\omega) = p_A(x) \frac{||x - x'||^2}{|\cos \theta|} 
 \]
 
 onde $p_A$ é a distribuição de probabilidade em relação à medida de área e
-$p_\omega$ a probabilidade em relação a medida de ângulo sólido.
+$p_\omega$ a probabilidade em relação à medida de ângulo sólido.
 
 \section{Path Tracing}
 
 \citet{kajiya86} mostrou que métodos de Ray Tracing da época \citep{cook84,
-whitted80}, em que múltiplos raios são criados a cada intersecção,
+whitted80}, nos quais múltiplos raios são criados a cada intersecção,
 desnecessariamente gastam recursos computacionais em cálculos que pouco
-contribuem para valor final da integral. Intuitivamente, isso ocorre devido à
+contribuem para o valor final da integral. Intuitivamente, isso ocorre devido à
 natureza multiplicativa da equação da renderização, ao passo que a cada
 intersecção reduzimos a contribuição por fatores como o BRDF e o termo de
 geometria, deixando raios mais profundos na árvore com valor muito baixo de
@@ -452,9 +450,9 @@ $\omega_{o,m} = \frac{(x_{m+1} - x_{m})}{|(x_{m+1} - x_{m})|}$ e
 $\mathcal{P}_k$ é o espaço de caminhos de tamanho $k$.\footnote{O espaço de
 caminhos aqui é conjunto de sequências de direções $(\omega_1, \ldots,
 \omega_k)$, junto com uma posição inicial $x_0$. Podemos descobrir os
-\emph{pontos de um caminho} usando a função de \emph{Ray Casting}: $x_i =
+\emph{pontos de um caminho} utilizando a função de \emph{Ray Casting}: $x_i =
 \gamma(x_{i-1}, \omega_i)$. Assim, podemos representar um caminho apenas com
-seus pontos $\bar{x} = (x_1, \ldots, x_k)$. Neste trabalho, usaremos
+seus pontos $\bar{x} = (x_1, \ldots, x_k)$. Neste trabalho, utilizaremos
 majoritariamente a notação de pontos para se referir à um caminho.
 Diferentemente, Veach usa diretamente os pontos de um caminho como o caminho em
 sí, porém isso introduz diversos termos extras de visibilidade e de correção de

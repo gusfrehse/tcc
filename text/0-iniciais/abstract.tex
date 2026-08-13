@@ -9,14 +9,14 @@
   directly on the number of samples used. In this work, we implement a
   \emph{Path Tracer} and explore Multiple Importance Sampling \citep{veach95},
   a technique that combines different sampling strategies to reduce estimator
-  variance. The implementation combines BRDF sampling and direct light source
-  sampling, and the derivation of the MIS weights is presented explicitly for
-  the full path. The effectiveness of the technique is evaluated by comparing
-  images rendered with an equal number of samples, with and without Multiple
-  Importance Sampling. The results demonstrate that the technique significantly
-  reduces estimator variance: variance maps rendered with an equal number of
-  samples show an expressive reduction, with the version without Multiple
-  Importance Sampling exhibiting visibly high variance in contrast to the
-  version that employs it.
+  variance. The implementation combines the reflectance distribution sampling
+  and direct light source sampling, and the derivation of the weights is
+  presented explicitly for the full path. The effectiveness of the technique is
+  evaluated by comparing images rendered with an equal number of samples, with
+  and without Multiple Importance Sampling. The results demonstrate that the
+  technique significantly reduces estimator variance: variance maps rendered
+  with an equal number of samples show an expressive reduction, with the
+  version without Multiple Importance Sampling exhibiting visibly high variance
+  in contrast to the version that employs it.
 
 \end{abstract}
